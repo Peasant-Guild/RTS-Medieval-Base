@@ -42,4 +42,4 @@ Set **External Script Editor** to either:
 - **JetBrains Rider**
 - **Visual Studio Code**
 
-No other editor should be used for this project.
+No other editor should be used for this project. (Especially not visual studio mark my words)

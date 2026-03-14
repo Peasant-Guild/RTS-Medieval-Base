@@ -9,7 +9,7 @@ Hopefully all devs and future contributers will follow these conventions, or els
 - Try to force at least one other dev to go over your PR.
 
 ## Folder Structure
-Use this structure inside `Assets/`:
+Use this structure inside Assets/:
 Assets/
 +---Art/
 +---Audio/

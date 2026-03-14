@@ -10,16 +10,16 @@ Hopefully all devs and future contributers will follow these conventions, or els
 
 ## Folder Structure
 Use this structure inside Assets/:
-Assets/
-+---Art/
-+---Audio/
-+---Code/
-| +---Scripts/
-+---Docs/
-+---Level/
-| +---Prefabs/
-| +---Scenes/
-| +---UI/
+- Assets/
+- +---Art/
+- +---Audio/
+- +---Code/
+- | +---Scripts/
+- +---Docs/
+- +---Level/
+- | +---Prefabs/
+- | +---Scenes/
+- | +---UI/
 
 ## C# Naming
 
@@ -29,7 +29,6 @@ Assets/
 
 ### Files and classes
 - Use `PascalCase` for class names and file names.
-- For all of the above avoid long andand summarize the file's
 
  For Example:
  - `ActorController.cs`
@@ -74,7 +73,7 @@ Assets/
   [feature/fix/etc...]/branch-name-with-hyphens
 
   For example:
-    feature/project-feature-name
-    fix/jump-bug
+  - feature/project-feature-name
+  - fix/jump-bug
 
 

@@ -18,7 +18,7 @@ public class UnitMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Mouse.current != null && Mouse.current.rightButton.isPressed)
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
         {
             Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ground))

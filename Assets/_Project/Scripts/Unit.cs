@@ -1,16 +1,27 @@
-using System;
 using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    
-    void Start()
+    [SerializeField] private GameObject _selectionIndicator;
+
+    private void Start()
     {
         UnitSelectionManager.Instance.allUnitsList.Add(gameObject);
     }
 
     private void OnDestroy()
     {
-        UnitSelectionManager.Instance.allUnitsList.Remove(gameObject);
+        if (UnitSelectionManager.Instance != null)
+        {
+            UnitSelectionManager.Instance.allUnitsList.Remove(gameObject);
+        }
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        if (_selectionIndicator != null)
+        {
+            _selectionIndicator.SetActive(isSelected);
+        }
     }
 }

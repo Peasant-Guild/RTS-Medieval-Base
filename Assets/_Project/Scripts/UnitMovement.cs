@@ -1,12 +1,11 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class UnitMovement : MonoBehaviour
 {
-    [SerializeField] private LayerMask ground;
-    
+    [SerializeField] private LayerMask _ground;
+
     private Camera _cam;
     private NavMeshAgent _agent;
 
@@ -21,10 +20,11 @@ public class UnitMovement : MonoBehaviour
         if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
         {
             Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ground))
-                {
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
+            {
                 _agent.SetDestination(hit.point);
-                }
+            }
         }
     }
 }

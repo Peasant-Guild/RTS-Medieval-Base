@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e03b1df56363b2747ad17a7c72581335, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitMovement
-  ground:
+  _ground:
     serializedVersion: 2
     m_Bits: 64
 --- !u!114 &3654420146486413931
@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00ad94e6176c959419a521c54f47776a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
+  _selectionIndicator: {fileID: 8609201143416214840}
 --- !u!1 &8609201143416214840
 GameObject:
   m_ObjectHideFlags: 0

@@ -824,13 +824,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   allUnitsList: []
   unitsSelected: []
-  clickable:
+  _clickable:
     serializedVersion: 2
     m_Bits: 128
-  ground:
+  _ground:
     serializedVersion: 2
     m_Bits: 64
-  groundMarker: {fileID: 288465521}
+  _groundMarker: {fileID: 288465521}
 --- !u!4 &2025561826
 Transform:
   m_ObjectHideFlags: 0

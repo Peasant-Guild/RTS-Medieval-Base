@@ -12,8 +12,15 @@ public class UnitSelectionManager : MonoBehaviour
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private LayerMask _ground;
     [SerializeField] private GameObject _groundMarker;
+    [SerializeField] private RectTransform _selectBox;
+    [SerializeField] private float _dragThreshold = 10f;
+
 
     private Camera _cam;
+    private Vector2 _mousePosition; 
+    private Vector2 _boxStartPos;
+    private Vector2 _boxDimensions;
+    private bool _isDragging;
 
     private void Awake()
     {
@@ -47,14 +54,90 @@ public class UnitSelectionManager : MonoBehaviour
         HandleRightClickMovementMarker();
     }
 
+    /* Left Click */
     private void HandleLeftClickSelection()
     {
-        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current == null || (!Mouse.current.leftButton.wasPressedThisFrame && 
+                                      !Mouse.current.leftButton.isPressed && 
+                                      !Mouse.current.leftButton.wasReleasedThisFrame))
+        {
+            _isDragging = false;
+            return;
+        }
+
+        _mousePosition = Mouse.current.position.ReadValue();
+
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            HandleLeftClickPressed();
+        }
+        if (Mouse.current.leftButton.isPressed)
+        {   
+            HandleLeftClickHeld();
+        }
+        if (Mouse.current.leftButton.wasReleasedThisFrame)
+        {
+            HandleLeftClickReleased();
+        }
+    }
+    
+    private void HandleLeftClickPressed()
+    {
+        _boxStartPos = _mousePosition;
+        _isDragging = false;
+        CleanBox();
+    
+        HandleBasicSelect();
+    }
+
+    private void HandleLeftClickHeld()
+    {
+        if (!_isDragging && Vector2.Distance(_boxStartPos, _mousePosition) > _dragThreshold)
+        {
+            _isDragging = true;
+
+            if (_selectBox != null)
+            {
+                _selectBox.gameObject.SetActive(true);
+            }
+        }
+
+        if (_isDragging)
+        {
+            HandleBoxSelect();            
+        }
+    }
+
+    private void HandleLeftClickReleased()
+    {
+        _isDragging = false;
+        _boxStartPos = Vector2.zero;
+        CleanBox();
+    }
+
+    private void HandleBoxSelect()
+    {
+        _boxDimensions = new Vector2(_mousePosition.x - _boxStartPos.x, _mousePosition.y - _boxStartPos.y);
+
+        if (_selectBox == null)
         {
             return;
         }
 
-        Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (!_selectBox.gameObject.activeInHierarchy)
+        {
+            _selectBox.gameObject.SetActive(true);
+        }   
+
+        _selectBox.sizeDelta = new Vector2(Mathf.Abs(_boxDimensions.x), Mathf.Abs(_boxDimensions.y));
+        _selectBox.anchoredPosition = _boxStartPos + _boxDimensions/2;
+
+        SelectMultiUnit();
+    }
+
+    private void HandleBasicSelect()
+    {
+        Ray ray = _cam.ScreenPointToRay(_mousePosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
         {
@@ -114,6 +197,38 @@ public class UnitSelectionManager : MonoBehaviour
             SetUnitMovementEnabled(unit, true);
         }
     }
+
+    private void SelectMultiUnit()
+    {
+        ClearSelection();
+
+        foreach (GameObject unit in allUnitsList)
+        {
+            if (!IsUnitInBox(unit))
+            {
+                continue;
+            }
+            unitsSelected.Add(unit);
+            SetUnitSelected(unit, true);
+            SetUnitMovementEnabled(unit, true);
+        }
+    }
+
+    private bool IsUnitInBox(GameObject unit)
+    {
+        Vector3 screenPos = _cam.WorldToScreenPoint(unit.transform.position);
+        return screenPos.z > 0 && RectTransformUtility.RectangleContainsScreenPoint(_selectBox, screenPos, null);
+    }
+
+    private void CleanBox()
+    {
+        if (_selectBox != null)
+        {
+            _selectBox.gameObject.SetActive(false);
+            _selectBox.sizeDelta = Vector2.zero;
+            _selectBox.anchoredPosition = Vector2.zero;
+        }        
+    } 
 
     private void ClearSelection()
     {

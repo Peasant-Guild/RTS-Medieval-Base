@@ -135,6 +135,10 @@ public class UnitSelectionManager : MonoBehaviour
         _selectBox.sizeDelta = new Vector2(Mathf.Abs(_boxDimensions.x), Mathf.Abs(_boxDimensions.y));
         _selectBox.anchoredPosition = _boxStartPos + _boxDimensions/2;
 
+        if (Keyboard.current == null || !Keyboard.current.leftShiftKey.isPressed)
+        {
+            ClearSelection();           
+        }
         SelectMultiUnit();
     }
 

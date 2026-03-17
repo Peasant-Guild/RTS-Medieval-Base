@@ -209,7 +209,7 @@ public class UnitSelectionManager : MonoBehaviour
     {
         foreach (GameObject unit in allUnitsList)
         {
-            if (!IsUnitInBox(unit))
+            if (unitsSelected.Contains(unit) || !IsUnitInBox(unit))
             {
                 continue;
             }

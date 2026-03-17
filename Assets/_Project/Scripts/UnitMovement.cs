@@ -1,12 +1,11 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class UnitMovement : MonoBehaviour
 {
-    [SerializeField] private LayerMask ground;
-    
+    [SerializeField] private LayerMask _ground;
+
     private Camera _cam;
     private NavMeshAgent _agent;
 
@@ -14,17 +13,23 @@ public class UnitMovement : MonoBehaviour
     {
         _cam = Camera.main;
         _agent = GetComponent<NavMeshAgent>();
+        
+        if (_cam == null)
+        {
+            Debug.LogError("UnitSelectionManager could not find a main camera.", this);
+        }
     }
 
     private void Update()
     {
-        if (Mouse.current != null && Mouse.current.rightButton.isPressed)
+        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
         {
             Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ground))
-                {
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
+            {
                 _agent.SetDestination(hit.point);
-                }
+            }
         }
     }
 }

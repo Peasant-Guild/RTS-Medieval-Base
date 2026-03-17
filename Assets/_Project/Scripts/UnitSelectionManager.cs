@@ -86,8 +86,6 @@ public class UnitSelectionManager : MonoBehaviour
         _boxStartPos = _mousePosition;
         _isDragging = false;
         CleanBox();
-    
-        HandleBasicSelect();
     }
 
     private void HandleLeftClickHeld()
@@ -110,6 +108,11 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void HandleLeftClickReleased()
     {
+        if (!_isDragging)
+        {
+            HandleBasicSelect();
+        }
+
         _isDragging = false;
         _boxStartPos = Vector2.zero;
         CleanBox();
@@ -154,7 +157,7 @@ public class UnitSelectionManager : MonoBehaviour
         }
         else if (Keyboard.current == null || !Keyboard.current.leftShiftKey.isPressed)
         {
-            ClearSelection();
+            ClearSelection();            
         }
     }
 
@@ -200,8 +203,6 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void SelectMultiUnit()
     {
-        ClearSelection();
-
         foreach (GameObject unit in allUnitsList)
         {
             if (!IsUnitInBox(unit))

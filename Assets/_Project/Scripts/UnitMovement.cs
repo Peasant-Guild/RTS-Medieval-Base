@@ -13,6 +13,11 @@ public class UnitMovement : MonoBehaviour
     {
         _cam = Camera.main;
         _agent = GetComponent<NavMeshAgent>();
+        
+        if (_cam == null)
+        {
+            Debug.LogError("UnitSelectionManager could not find a main camera.", this);
+        }
     }
 
     private void Update()

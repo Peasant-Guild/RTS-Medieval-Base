@@ -29,6 +29,16 @@ public class UnitSelectionManager : MonoBehaviour
     private void Start()
     {
         _cam = Camera.main;
+        
+        if (_cam == null)
+        {
+            Debug.LogError("UnitSelectionManager could not find a main camera.", this);
+        }
+
+        if (_groundMarker == null)
+        {
+            Debug.LogWarning("UnitSelectionManager has no ground marker assigned.", this);
+        }
     }
 
     private void Update()
@@ -114,6 +124,12 @@ public class UnitSelectionManager : MonoBehaviour
         }
 
         unitsSelected.Clear();
+        
+        if (_groundMarker == null)
+        {
+            return;
+        }
+        
         _groundMarker.SetActive(false);
     }
 
@@ -139,6 +155,11 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void ShowGroundMarker(Vector3 position)
     {
+        if (_groundMarker == null)
+        {
+            return;
+        }
+        
         _groundMarker.transform.position = position;
         _groundMarker.SetActive(false);
         // TODO: Marker animation here

@@ -1,15 +1,24 @@
 using System;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal.Internal;
 
 public class CameraController : MonoBehaviour
 {
-
-    [SerializeField] private float panSpeed = 10f;
+    [Header("General")]
     [SerializeField] private Camera _cam;
-    [SerializeField] private float _zoomSpeed = 50f;
-    [SerializeField] private float _maxZoom = 30f;
-    [SerializeField] private float _minZoom = 5f;
+
+    [Header("Zoom")]
+    [SerializeField] private float _zoomSpeed = 100f;
+    [SerializeField] private float _minZoom = 10f;
+    [SerializeField] private float _maxZoom = 50f;
+
+    [Header("Movement")]
+    [SerializeField] private float _panSpeedKeyboard = 20f;
+    [SerializeField] private float _panSpeedMouse = 30f;
+
+    [SerializeField] private float _panBorderThickness = 20f;
     private float _scrollValue;
     private Vector3 _direction;
 
@@ -27,7 +36,7 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Keyboard.current == null || Mouse.current == null)
+        if (Keyboard.current == null || Mouse.current == null || _cam == null)
         {
             return;
         }
@@ -43,34 +52,71 @@ public class CameraController : MonoBehaviour
         Vector3 forward = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
         Vector3 right   = Quaternion.Euler(0f, yaw, 0f) * Vector3.right;
 
-        _direction = GetDirection(forward, right);
+        _direction = GetKeyboardDirection(forward, right) + GetMouseDirection(forward, right);
 
-        if (_direction.sqrMagnitude > 1f)
+        transform.position += _direction * Time.deltaTime;
+    }
+
+    private Vector3 GetMouseDirection(Vector3 forward, Vector3 right)
+    {
+        Vector3 mousePos = Mouse.current.position.ReadValue();
+        Vector3 mouseDirection = Vector3.zero;
+
+        int height = Screen.height;
+        int width = Screen.width;
+
+        if (mousePos.y >= height - _panBorderThickness)
         {
-            _direction.Normalize();
+            mouseDirection += forward;
+        }
+        if (mousePos.y <= _panBorderThickness)
+        {
+            mouseDirection -= forward;
+        }
+        if (mousePos.x >= width - _panBorderThickness)
+        {
+            mouseDirection += right;
+        }
+        if (mousePos.x <= _panBorderThickness)
+        {
+            mouseDirection -= right;
         }
 
-        transform.position += _direction * panSpeed * Time.deltaTime;
+        if (mouseDirection.sqrMagnitude > 1f)
+        {
+            mouseDirection.Normalize();
+        }
+
+        return mouseDirection * _panSpeedMouse;
     }
-    private Vector3 GetDirection(Vector3 forward, Vector3 right)
+
+    private Vector3 GetKeyboardDirection(Vector3 forward, Vector3 right)
     {
+        Vector3 keyboardDirection = Vector3.zero;
+
         if (Keyboard.current.upArrowKey.isPressed)
         {
-            return forward;  
+            keyboardDirection += forward;
         }
         if (Keyboard.current.downArrowKey.isPressed)
         {
-            return -forward;
+            keyboardDirection -= forward;
         }
         if (Keyboard.current.rightArrowKey.isPressed)
         {
-            return right;
+            keyboardDirection += right;
         }
         if (Keyboard.current.leftArrowKey.isPressed)
         {
-            return -right;
+            keyboardDirection -= right;
         }
-        return Vector3.zero;
+
+        if (keyboardDirection.sqrMagnitude > 1f)
+        {
+            keyboardDirection.Normalize();
+        }
+
+        return keyboardDirection * _panSpeedKeyboard;
     }
 
     private void HandleCameraZoom()

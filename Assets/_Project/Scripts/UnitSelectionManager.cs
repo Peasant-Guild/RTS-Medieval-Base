@@ -188,10 +188,39 @@ public class UnitSelectionManager : MonoBehaviour
 
         Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
         {
-            CommandSelectedUnitsToMove(hit.point);
-            ShowGroundMarker(hit.point);
+            GameObject clickedUnit = hit.collider.gameObject;
+
+            if (clickedUnit != null && clickedUnit.CompareTag("Enemy"))
+            {
+                CommandSelectedUnitsToFollow(clickedUnit.transform);
+                return;
+            }
+        }
+
+        if (Physics.Raycast(ray, out RaycastHit groundHit, Mathf.Infinity, _ground))
+        {
+            CommandSelectedUnitsToMove(groundHit.point);
+            ShowGroundMarker(groundHit.point);
+        }
+    }
+    
+    private void CommandSelectedUnitsToFollow(Transform target)
+    {
+        foreach (GameObject unit in unitsSelected)
+        {
+            if (unit == null)
+            {
+                continue;
+            }
+
+            UnitStateController stateController = unit.GetComponent<UnitStateController>();
+
+            if (stateController != null)
+            {
+                stateController.FollowTarget(target);
+            }
         }
     }
 
@@ -204,11 +233,11 @@ public class UnitSelectionManager : MonoBehaviour
                 continue;
             }
 
-            UnitMovement unitMovement = unit.GetComponent<UnitMovement>();
+            UnitStateController stateController = unit.GetComponent<UnitStateController>();
 
-            if (unitMovement != null)
+            if (stateController != null)
             {
-                unitMovement.MoveTo(destination);
+                stateController.MoveTo(destination);
             }
         }
     }

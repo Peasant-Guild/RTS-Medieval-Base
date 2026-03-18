@@ -99,10 +99,10 @@ public class UnitSelectionManager : MonoBehaviour
                 _selectBox.gameObject.SetActive(true);
             }
         }
-
         if (_isDragging)
         {
-            HandleBoxSelect();            
+            UpdateSelectionBoxVisual();
+            UpdateBoxSelection();
         }
     }
 
@@ -118,7 +118,7 @@ public class UnitSelectionManager : MonoBehaviour
         CleanBox();
     }
 
-    private void HandleBoxSelect()
+    private void UpdateSelectionBoxVisual()
     {
         _boxDimensions = new Vector2(_mousePosition.x - _boxStartPos.x, _mousePosition.y - _boxStartPos.y);
 
@@ -130,15 +130,19 @@ public class UnitSelectionManager : MonoBehaviour
         if (!_selectBox.gameObject.activeInHierarchy)
         {
             _selectBox.gameObject.SetActive(true);
-        }   
+        }
 
         _selectBox.sizeDelta = new Vector2(Mathf.Abs(_boxDimensions.x), Mathf.Abs(_boxDimensions.y));
-        _selectBox.anchoredPosition = _boxStartPos + _boxDimensions/2;
+        _selectBox.anchoredPosition = _boxStartPos + _boxDimensions / 2f;
+    }
 
+    private void UpdateBoxSelection()
+    {
         if (Keyboard.current == null || !Keyboard.current.leftShiftKey.isPressed)
         {
-            ClearSelection();           
+            ClearSelection();
         }
+
         SelectMultiUnit();
     }
 

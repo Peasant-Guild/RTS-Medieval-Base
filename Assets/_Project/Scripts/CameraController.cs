@@ -7,7 +7,7 @@ public class CameraController : MonoBehaviour
 
     [SerializeField] private float panSpeed = 10f;
     [SerializeField] private Camera _cam;
-    [SerializeField] private float _zoomSpeed = 10f;
+    [SerializeField] private float _zoomSpeed = 50f;
     [SerializeField] private float _maxZoom = 30f;
     [SerializeField] private float _minZoom = 5f;
     private float _scrollValue;
@@ -77,9 +77,12 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        Vector3 posChange = transform.position + _cam.transform.forward * (_scrollValue * _zoomSpeed * Time.deltaTime);
-        posChange.y = Mathf.Clamp(posChange.y, _minZoom, _maxZoom);
+        Vector3 newPos = transform.position + _cam.transform.forward * (_scrollValue * _zoomSpeed * Time.deltaTime);
+        newPos.y = Mathf.Clamp(newPos.y, _minZoom, _maxZoom);
 
-        transform.position = posChange;
+        if (newPos.y != _minZoom && newPos.y != _maxZoom)
+        {
+            transform.position = newPos;
+        }
     }
 }

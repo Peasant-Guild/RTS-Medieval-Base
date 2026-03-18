@@ -17,12 +17,17 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         _cam = Camera.main;
+
+        if (_cam == null)
+        {
+            Debug.LogError("CameraController could not find a main camera.", this);
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Keyboard.current == null || Mouse.current == null||  _cam == null)
+        if (Keyboard.current == null || Mouse.current == null)
         {
             return;
         }

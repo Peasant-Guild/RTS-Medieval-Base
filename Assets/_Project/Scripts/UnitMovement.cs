@@ -1,35 +1,55 @@
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.InputSystem;
 
 public class UnitMovement : MonoBehaviour
 {
-    [SerializeField] private LayerMask _ground;
-
-    private Camera _cam;
     private NavMeshAgent _agent;
 
-    private void Start()
+    private void Awake()
     {
-        _cam = Camera.main;
         _agent = GetComponent<NavMeshAgent>();
-        
-        if (_cam == null)
+
+        if (_agent == null)
         {
-            Debug.LogError("UnitSelectionManager could not find a main camera.", this);
+            Debug.LogError("UnitMovement could not find a NavMeshAgent.", this);
+            enabled = false;
         }
     }
 
-    private void Update()
+    public void MoveTo(Vector3 destination, float stoppingDistance = 0f)
     {
-        if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+        if (_agent == null)
         {
-            Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
-            {
-                _agent.SetDestination(hit.point);
-            }
+            return;
         }
+
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.isStopped = false;
+        _agent.SetDestination(destination);
+    }
+
+    public void Stop()
+    {
+        if (_agent == null)
+        {
+            return;
+        }
+
+        _agent.isStopped = true;
+    }
+
+    public bool HasReachedDestination()
+    {
+        if (_agent == null)
+        {
+            return true;
+        }
+
+        if (_agent.pathPending)
+        {
+            return false;
+        }
+
+        return _agent.remainingDistance <= _agent.stoppingDistance;
     }
 }

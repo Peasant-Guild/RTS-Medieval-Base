@@ -1,39 +1,85 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
 
-    public float panSpeed = 20f;
+    [SerializeField] private float panSpeed = 10f;
+    [SerializeField] private Camera _cam;
+    [SerializeField] private float _zoomSpeed = 10f;
+    [SerializeField] private float _maxZoom = 30f;
+    [SerializeField] private float _minZoom = 5f;
+    private float _scrollValue;
+    private Vector3 _direction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        _cam = Camera.main;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 pos = transform.position;
+        if (Keyboard.current == null || Mouse.current == null||  _cam == null)
+        {
+            return;
+        }
 
+        HandleCameraMovement();
+        HandleCameraZoom();
+    }
+
+    private void HandleCameraMovement()
+    {
+        float yaw = _cam.transform.eulerAngles.y;
+
+        Vector3 forward = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
+        Vector3 right   = Quaternion.Euler(0f, yaw, 0f) * Vector3.right;
+
+        _direction = GetDirection(forward, right);
+
+        if (_direction.sqrMagnitude > 1f)
+        {
+            _direction.Normalize();
+        }
+
+        transform.position += _direction * panSpeed * Time.deltaTime;
+    }
+    private Vector3 GetDirection(Vector3 forward, Vector3 right)
+    {
         if (Keyboard.current.upArrowKey.isPressed)
         {
-            pos.z += panSpeed * Time.deltaTime;
+            return forward;  
         }
         if (Keyboard.current.downArrowKey.isPressed)
         {
-            pos.z -= panSpeed * Time.deltaTime;
+            return -forward;
         }
         if (Keyboard.current.rightArrowKey.isPressed)
         {
-            pos.x += panSpeed * Time.deltaTime;
+            return right;
         }
         if (Keyboard.current.leftArrowKey.isPressed)
         {
-            pos.x -= panSpeed * Time.deltaTime;
+            return -right;
+        }
+        return Vector3.zero;
+    }
+
+    private void HandleCameraZoom()
+    {
+        _scrollValue = Mouse.current.scroll.ReadValue().y;
+
+        if (Mathf.Approximately(_scrollValue, 0f))
+        {
+            return;
         }
 
-        transform.position = pos;
+        Vector3 posChange = transform.position + _cam.transform.forward * (_scrollValue * _zoomSpeed * Time.deltaTime);
+        posChange.y = Mathf.Clamp(posChange.y, _minZoom, _maxZoom);
+
+        transform.position = posChange;
     }
 }

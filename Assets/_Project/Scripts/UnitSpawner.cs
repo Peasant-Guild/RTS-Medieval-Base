@@ -33,7 +33,7 @@ public class UnitSpawner : MonoBehaviour
     
     private GameObject _currentUnit = null;
     
-    [SerializeField] private Queue<spawnInfo> _unitsToSpawn =  new Queue<spawnInfo>();
+    [SerializeField] private List<spawnInfo> _unitsToSpawn =  new List<spawnInfo>();
     
 
     private void Start()
@@ -72,15 +72,15 @@ public class UnitSpawner : MonoBehaviour
 
     private void LoadNextUnit()
     {
-        _currentUnit = _unitsToSpawn.Peek().gameObject;
-        _spawnCountdownTimer = _unitsToSpawn.Peek().spawnTime;
-        if (_unitsToSpawn.Peek().amount-- == 1)
+        _currentUnit = _unitsToSpawn[0].gameObject;
+        _spawnCountdownTimer = _unitsToSpawn[0].spawnTime;
+        if (--_unitsToSpawn[0].amount == 0)
         {
-            _unitsToSpawn.Dequeue();
+            _unitsToSpawn.RemoveAt(0);
         }
     }
     
-    private void CallSpawn(GameObject unit, int amount = 1, float spawnTime = 2f)
+    public void CallSpawn(GameObject unit, int amount = 1, float spawnTime = 2f)
     {
         if (unit == null || amount <= 0 || spawnTime <= 0f)
         {
@@ -93,7 +93,28 @@ public class UnitSpawner : MonoBehaviour
         }
         else
         {
-            _unitsToSpawn.Enqueue(new spawnInfo(unit, amount, spawnTime));
+            _unitsToSpawn.Add(new spawnInfo(unit, amount, spawnTime));
+        }
+    }
+
+    public void CancelLatestCreation(GameObject unit)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+
+        for (int i = _unitsToSpawn.Count - 1; i >= 0; i--)
+        {
+            if (_unitsToSpawn[i].gameObject == unit)
+            {
+                if (--_unitsToSpawn[i].amount == 0)
+                {
+                    _unitsToSpawn.RemoveAt(i);
+                }
+
+                return;
+            }
         }
     }
     

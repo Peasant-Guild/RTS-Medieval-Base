@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -7,10 +8,15 @@ public class UnitSpawner : MonoBehaviour
     public GameObject unitToSpawn;
     [SerializeField] private float _spawnTime = 2f;
     [SerializeField] private float _spawnCountdownTimer;
-    [SerializeField] private bool _spawnIndefinitely; //should the spawner keep spawning indefinitely
-    [FormerlySerializedAs("_active")] [SerializeField] private int _currentlySpawning = 0; // amount of units to be spawned
+    [SerializeField] private bool _spawnIndefinitely;
+    [SerializeField] private int _currentlySpawning = 0;
 
-    [SerializeField] private Vector3 _offsetVector;
+    //offsets are relative to the *center* of the building
+    [SerializeField] private Vector3 _entranceSpawnOffset;
+    [SerializeField] private Vector3 _outsideOffset; //walk out position
+    [SerializeField] private Vector3 _destination;
+    
+
     private void Start()
     {
         _spawnCountdownTimer = _spawnTime;
@@ -34,25 +40,33 @@ public class UnitSpawner : MonoBehaviour
 
     // private void OnMouseDown() //debug purposes only
     // {
-    //     StartIndefiniteSpawning();
+    //     CallSpawn();
     // }
     private void CallSpawn(int amount = 1)
     {
         _currentlySpawning += amount;
     }
 
-    private void StartIndefiniteSpawning()
+    public void StartIndefiniteSpawning()
     {
         _spawnIndefinitely = true;
         _currentlySpawning = 0;
     }
-    private void StopIndefiniteSpawning()
+    public void StopIndefiniteSpawning()
     {
         _spawnIndefinitely = false;
         _currentlySpawning = 0;
     }
     private void SpawnUnit()
     {
-        Instantiate(unitToSpawn, transform.position + _offsetVector, transform.rotation);
+        GameObject unit_obj = Instantiate(unitToSpawn, transform.position + _entranceSpawnOffset, transform.rotation);
+        UnitMovement walker = unit_obj.GetComponent<UnitMovement>();
+        walker.MoveTo(transform.position + _outsideOffset);
+        
+        //needs waypoints!
+        // if (_destination != Vector3.zero)
+        // {
+        //     walker.MoveTo(_destination);
+        // }
     }
 }

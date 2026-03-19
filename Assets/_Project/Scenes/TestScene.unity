@@ -553,14 +553,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8937d173dc8422459109451e2528255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  unitToSpawn: {fileID: 3499283322596585529, guid: 00fa6563f7205e4479afcb814618c84d, type: 3}
-  _spawnTime: 2
+  _unitType: {fileID: 3499283322596585529, guid: 00fa6563f7205e4479afcb814618c84d, type: 3}
   _spawnCountdownTimer: 0
-  _spawnIndefinitely: 0
-  _currentlySpawning: 0
   _entranceSpawnOffset: {x: 0, y: 0, z: 0}
   _outsideOffset: {x: -4, y: 0, z: 0}
-  _destination: {x: 0, y: 0, z: 0}
 --- !u!65 &454097942
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -648,7 +644,7 @@ Transform:
   m_GameObject: {fileID: 454097940}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 50.66, y: 1.73456, z: 18.93}
+  m_LocalPosition: {x: 42.31, y: 1.73456, z: 18.93}
   m_LocalScale: {x: 4, y: 1, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []

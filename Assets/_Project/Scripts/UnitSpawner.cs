@@ -9,15 +9,15 @@ public class UnitSpawner : MonoBehaviour
 {
     
     [SerializeField] private GameObject _unitType; //for debug 
-    private class spawnInfo
     
+    private class SpawnInfo //does this survive the conventions test? :0
     {
-        public GameObject gameObject;
+        public GameObject unitPrefab;
         public int amount;
         public float spawnTime;
-        public spawnInfo(GameObject unit, int amount, float spawnTime)
+        public SpawnInfo(GameObject unit, int amount, float spawnTime)
         {
-            this.gameObject = unit;
+            this.unitPrefab = unit;
             this.amount = amount;
             this.spawnTime = spawnTime;
         }
@@ -33,7 +33,7 @@ public class UnitSpawner : MonoBehaviour
     
     private GameObject _currentUnit = null;
     
-    [SerializeField] private List<spawnInfo> _unitsToSpawn =  new List<spawnInfo>();
+    [SerializeField] private List<SpawnInfo> _unitsToSpawn =  new List<SpawnInfo>();
     
 
     private void Start()
@@ -72,8 +72,8 @@ public class UnitSpawner : MonoBehaviour
 
     private void LoadNextUnit()
     {
-        _currentUnit = _unitsToSpawn[0].gameObject;
-        _spawnCountdownTimer = _unitsToSpawn[0].spawnTime;
+        _currentUnit = _unitsToSpawn[0].unitPrefab;
+        _spawnCountdownTimer = _unitsToSpawn[0].spawnTime + _spawnCountdownTimer; //conserve overall time frame (carry over negatives)
         if (--_unitsToSpawn[0].amount == 0)
         {
             _unitsToSpawn.RemoveAt(0);
@@ -87,13 +87,13 @@ public class UnitSpawner : MonoBehaviour
             return;
         }
 
-        if (_unitsToSpawn.Count > 0 && _unitsToSpawn.Last().gameObject == unit)
+        if (_unitsToSpawn.Count > 0 && _unitsToSpawn.Last().unitPrefab == unit)
         {
             _unitsToSpawn.Last().amount+= amount;
         }
         else
         {
-            _unitsToSpawn.Add(new spawnInfo(unit, amount, spawnTime));
+            _unitsToSpawn.Add(new SpawnInfo(unit, amount, spawnTime));
         }
     }
 
@@ -106,7 +106,7 @@ public class UnitSpawner : MonoBehaviour
 
         for (int i = _unitsToSpawn.Count - 1; i >= 0; i--)
         {
-            if (_unitsToSpawn[i].gameObject == unit)
+            if (_unitsToSpawn[i].unitPrefab == unit)
             {
                 if (--_unitsToSpawn[i].amount == 0)
                 {
@@ -116,12 +116,26 @@ public class UnitSpawner : MonoBehaviour
                 return;
             }
         }
+
+        if (_currentUnit == unit)
+        {
+            _currentUnit = null;
+            _spawnCountdownTimer = 0f;
+        }
     }
     
     private void SpawnUnit(GameObject unitToSpawn)
     {
         GameObject unit_obj = Instantiate(unitToSpawn, transform.position + _entranceSpawnOffset, transform.rotation);
+        if (unit_obj == null)
+        {
+            return;
+        }
         UnitMovement walker = unit_obj.GetComponent<UnitMovement>();
+        if (walker == null)
+        {
+            return;
+        }
         walker.MoveTo(transform.position + _outsideOffset);
         
         //TODO: needs waypoints in order to send to a final destination

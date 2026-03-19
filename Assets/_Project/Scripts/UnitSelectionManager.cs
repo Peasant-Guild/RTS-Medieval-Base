@@ -15,9 +15,8 @@ public class UnitSelectionManager : MonoBehaviour
     [SerializeField] private RectTransform _selectBox;
     [SerializeField] private float _dragThreshold = 10f;
 
-
     private Camera _cam;
-    private Vector2 _mousePosition; 
+    private Vector2 _mousePosition;
     private Vector2 _boxStartPos;
     private Vector2 _boxDimensions;
     private bool _isDragging;
@@ -36,10 +35,12 @@ public class UnitSelectionManager : MonoBehaviour
     private void Start()
     {
         _cam = Camera.main;
-        
+
         if (_cam == null)
         {
             Debug.LogError("UnitSelectionManager could not find a main camera.", this);
+            enabled = false;
+            return;
         }
 
         if (_groundMarker == null)
@@ -54,11 +55,10 @@ public class UnitSelectionManager : MonoBehaviour
         HandleRightClickMovementMarker();
     }
 
-    /* Left Click */
     private void HandleLeftClickSelection()
     {
-        if (Mouse.current == null || (!Mouse.current.leftButton.wasPressedThisFrame && 
-                                      !Mouse.current.leftButton.isPressed && 
+        if (Mouse.current == null || (!Mouse.current.leftButton.wasPressedThisFrame &&
+                                      !Mouse.current.leftButton.isPressed &&
                                       !Mouse.current.leftButton.wasReleasedThisFrame))
         {
             _isDragging = false;
@@ -71,16 +71,18 @@ public class UnitSelectionManager : MonoBehaviour
         {
             HandleLeftClickPressed();
         }
+
         if (Mouse.current.leftButton.isPressed)
-        {   
+        {
             HandleLeftClickHeld();
         }
+
         if (Mouse.current.leftButton.wasReleasedThisFrame)
         {
             HandleLeftClickReleased();
         }
     }
-    
+
     private void HandleLeftClickPressed()
     {
         _boxStartPos = _mousePosition;
@@ -99,6 +101,7 @@ public class UnitSelectionManager : MonoBehaviour
                 _selectBox.gameObject.SetActive(true);
             }
         }
+
         if (_isDragging)
         {
             UpdateSelectionBoxVisual();
@@ -152,7 +155,14 @@ public class UnitSelectionManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
         {
-            GameObject clickedObject = hit.collider.gameObject;
+            Unit clickedUnit = hit.collider.GetComponentInParent<Unit>();
+
+            if (clickedUnit == null)
+            {
+                return;
+            }
+
+            GameObject clickedObject = clickedUnit.gameObject;
 
             if (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed)
             {
@@ -165,7 +175,7 @@ public class UnitSelectionManager : MonoBehaviour
         }
         else if (Keyboard.current == null || !Keyboard.current.leftShiftKey.isPressed)
         {
-            ClearSelection();            
+            ClearSelection();
         }
     }
 
@@ -178,9 +188,57 @@ public class UnitSelectionManager : MonoBehaviour
 
         Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
         {
-            ShowGroundMarker(hit.point);
+            GameObject clickedUnit = hit.collider.gameObject;
+
+            if (clickedUnit != null && clickedUnit.CompareTag("Enemy"))
+            {
+                CommandSelectedUnitsToFollow(clickedUnit.transform);
+                return;
+            }
+        }
+
+        if (Physics.Raycast(ray, out RaycastHit groundHit, Mathf.Infinity, _ground))
+        {
+            CommandSelectedUnitsToMove(groundHit.point);
+            ShowGroundMarker(groundHit.point);
+        }
+    }
+    
+    private void CommandSelectedUnitsToFollow(Transform target)
+    {
+        foreach (GameObject unit in unitsSelected)
+        {
+            if (unit == null)
+            {
+                continue;
+            }
+
+            UnitStateController stateController = unit.GetComponent<UnitStateController>();
+
+            if (stateController != null)
+            {
+                stateController.FollowTarget(target);
+            }
+        }
+    }
+
+    private void CommandSelectedUnitsToMove(Vector3 destination)
+    {
+        foreach (GameObject unit in unitsSelected)
+        {
+            if (unit == null)
+            {
+                continue;
+            }
+
+            UnitStateController stateController = unit.GetComponent<UnitStateController>();
+
+            if (stateController != null)
+            {
+                stateController.MoveTo(destination);
+            }
         }
     }
 
@@ -190,7 +248,6 @@ public class UnitSelectionManager : MonoBehaviour
 
         unitsSelected.Add(unit);
         SetUnitSelected(unit, true);
-        SetUnitMovementEnabled(unit, true);
     }
 
     private void ToggleUnitSelection(GameObject unit)
@@ -198,14 +255,12 @@ public class UnitSelectionManager : MonoBehaviour
         if (unitsSelected.Contains(unit))
         {
             SetUnitSelected(unit, false);
-            SetUnitMovementEnabled(unit, false);
             unitsSelected.Remove(unit);
         }
         else
         {
             unitsSelected.Add(unit);
             SetUnitSelected(unit, true);
-            SetUnitMovementEnabled(unit, true);
         }
     }
 
@@ -213,18 +268,23 @@ public class UnitSelectionManager : MonoBehaviour
     {
         foreach (GameObject unit in allUnitsList)
         {
-            if (unitsSelected.Contains(unit) || !IsUnitInBox(unit))
+            if (unit == null || unitsSelected.Contains(unit) || !IsUnitInBox(unit))
             {
                 continue;
             }
+
             unitsSelected.Add(unit);
             SetUnitSelected(unit, true);
-            SetUnitMovementEnabled(unit, true);
         }
     }
 
     private bool IsUnitInBox(GameObject unit)
     {
+        if (unit == null || _selectBox == null)
+        {
+            return false;
+        }
+
         Vector3 screenPos = _cam.WorldToScreenPoint(unit.transform.position);
         return screenPos.z > 0 && RectTransformUtility.RectangleContainsScreenPoint(_selectBox, screenPos, null);
     }
@@ -236,35 +296,29 @@ public class UnitSelectionManager : MonoBehaviour
             _selectBox.gameObject.SetActive(false);
             _selectBox.sizeDelta = Vector2.zero;
             _selectBox.anchoredPosition = Vector2.zero;
-        }        
-    } 
+        }
+    }
 
     private void ClearSelection()
     {
         foreach (GameObject unit in unitsSelected)
         {
+            if (unit == null)
+            {
+                continue;
+            }
+
             SetUnitSelected(unit, false);
-            SetUnitMovementEnabled(unit, false);
         }
 
         unitsSelected.Clear();
-        
+
         if (_groundMarker == null)
         {
             return;
         }
-        
+
         _groundMarker.SetActive(false);
-    }
-
-    private void SetUnitMovementEnabled(GameObject unit, bool shouldEnable)
-    {
-        UnitMovement unitMovement = unit.GetComponent<UnitMovement>();
-
-        if (unitMovement != null)
-        {
-            unitMovement.enabled = shouldEnable;
-        }
     }
 
     private void SetUnitSelected(GameObject unit, bool isSelected)
@@ -283,7 +337,7 @@ public class UnitSelectionManager : MonoBehaviour
         {
             return;
         }
-        
+
         _groundMarker.transform.position = position;
         _groundMarker.SetActive(false);
         // TODO: Marker animation here

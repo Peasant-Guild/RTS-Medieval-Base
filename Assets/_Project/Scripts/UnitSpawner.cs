@@ -1,10 +1,14 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
+
 public class UnitSpawner : MonoBehaviour
 {
     public GameObject unitToSpawn;
     [SerializeField] private float _spawnTime = 2f;
     [SerializeField] private float _spawnCountdownTimer;
-    [SerializeField] private bool _active = false; // answers the question: "Should I start spawning a unit?"
+    [SerializeField] private bool _spawnIndefinitely; //should the spawner keep spawning indefinitely
+    [FormerlySerializedAs("_active")] [SerializeField] private int _currentlySpawning = 0; // amount of units to be spawned
 
     [SerializeField] private Vector3 _offsetVector;
     private void Start()
@@ -13,7 +17,7 @@ public class UnitSpawner : MonoBehaviour
     }
     private void Update()
     {
-        if (_active)
+        if (_currentlySpawning > 0 || _spawnIndefinitely)
         {
             _spawnCountdownTimer -= Time.deltaTime; // countdown mechanic
         }
@@ -21,12 +25,31 @@ public class UnitSpawner : MonoBehaviour
         {
             SpawnUnit();
             _spawnCountdownTimer = _spawnTime;
-            _active = false;
+            if (!_spawnIndefinitely)
+            {
+                _currentlySpawning -= 1;
+            }
         }
     }
-    private void CallSpawn()
+
+    // private void OnMouseDown() //debug purposes only
+    // {
+    //     StartIndefiniteSpawning();
+    // }
+    private void CallSpawn(int amount = 1)
     {
-        _active = true;
+        _currentlySpawning += amount;
+    }
+
+    private void StartIndefiniteSpawning()
+    {
+        _spawnIndefinitely = true;
+        _currentlySpawning = 0;
+    }
+    private void StopIndefiniteSpawning()
+    {
+        _spawnIndefinitely = false;
+        _currentlySpawning = 0;
     }
     private void SpawnUnit()
     {

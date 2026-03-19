@@ -533,10 +533,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8937d173dc8422459109451e2528255, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  _unitToSpawn: {fileID: 3499283322596585529, guid: 00fa6563f7205e4479afcb814618c84d, type: 3}
+  unitToSpawn: {fileID: 3499283322596585529, guid: 00fa6563f7205e4479afcb814618c84d, type: 3}
   _spawnTime: 2
   _spawnCountdownTimer: 0
-  _active: 0
+  _spawnIndefinitely: 0
+  _currentlySpawning: 0
   _offsetVector: {x: 0, y: 0, z: -4}
 --- !u!65 &454097942
 BoxCollider:
@@ -557,7 +558,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 4, y: 1, z: 4}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &454097943
 MeshRenderer:

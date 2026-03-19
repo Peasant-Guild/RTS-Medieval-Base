@@ -1,10 +1,10 @@
 using UnityEngine;
 public class UnitSpawner : MonoBehaviour
 {
-    public GameObject _unitToSpawn;
+    public GameObject unitToSpawn;
     [SerializeField] private float _spawnTime = 2f;
     [SerializeField] private float _spawnCountdownTimer;
-    [SerializeField] private bool _active = false; //answers the question: "Should I start spawning a unit?"
+    [SerializeField] private bool _active = false; // answers the question: "Should I start spawning a unit?"
 
     [SerializeField] private Vector3 _offsetVector;
     private void Start()
@@ -15,7 +15,7 @@ public class UnitSpawner : MonoBehaviour
     {
         if (_active)
         {
-            _spawnCountdownTimer -= Time.deltaTime; //countdown mechanic
+            _spawnCountdownTimer -= Time.deltaTime; // countdown mechanic
         }
         if (_spawnCountdownTimer <= 0) // <= is for subtle minus differences
         {
@@ -30,6 +30,6 @@ public class UnitSpawner : MonoBehaviour
     }
     private void SpawnUnit()
     {
-        Instantiate(_unitToSpawn, transform.position + _offsetVector, transform.rotation);
+        Instantiate(unitToSpawn, transform.position + _offsetVector, transform.rotation);
     }
 }

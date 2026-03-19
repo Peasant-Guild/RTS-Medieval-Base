@@ -188,6 +188,7 @@ GameObject:
   - component: {fileID: 214798932}
   - component: {fileID: 214798931}
   - component: {fileID: 214798930}
+  - component: {fileID: 214798934}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -306,13 +307,34 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 214798929}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalRotation: {x: 0.42471093, y: 0.33985054, z: -0.17592101, w: 0.8204718}
   m_LocalPosition: {x: 30, y: 20, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 54.736, y: 45, z: 0}
+--- !u!114 &214798934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214798929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3fcad944bbf2dd418bf585caf39c372, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  _cam: {fileID: 214798932}
+  _zoomSpeed: 100
+  _minZoom: 10
+  _maxZoom: 50
+  _panSpeedKeyboard: 20
+  _panSpeedMouse: 30
+  _panBorderThickness: 20
+  _scrollValue: 0
+  _direction: {x: 0, y: 0, z: 0}
 --- !u!1 &288465521
 GameObject:
   m_ObjectHideFlags: 0

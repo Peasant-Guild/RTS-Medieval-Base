@@ -126,7 +126,9 @@ public class UnitSpawner : MonoBehaviour
     
     private void SpawnUnit(GameObject unitToSpawn)
     {
-        GameObject unit_obj = Instantiate(unitToSpawn, transform.position + _entranceSpawnOffset, transform.rotation);
+        Vector3 newPos = transform.position + _entranceSpawnOffset;
+        newPos.y = 0;
+        GameObject unit_obj = Instantiate(unitToSpawn, newPos, transform.rotation);
         if (unit_obj == null)
         {
             return;

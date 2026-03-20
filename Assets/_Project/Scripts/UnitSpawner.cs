@@ -39,6 +39,8 @@ public class UnitSpawner : MonoBehaviour
     private void Start()
     {
         _spawnCountdownTimer = 0;
+        //DEBUG EXAMPLE:
+        // CallSpawn(_unitType, 3, 2f);
     }
     
     private void Update()

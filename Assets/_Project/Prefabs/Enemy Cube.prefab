@@ -13,10 +13,11 @@ GameObject:
   - component: {fileID: 82686868499818149}
   - component: {fileID: 696690818886917400}
   - component: {fileID: 7320347205475035814}
-  - component: {fileID: 5657517404311810511}
+  - component: {fileID: 1860000000000000011}
+  - component: {fileID: 1860000000000000012}
   m_Layer: 7
   m_Name: Enemy Cube
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -141,7 +142,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5657517404311810511
+--- !u!114 &1860000000000000011
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -150,6 +151,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 3561588123288436287}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f1e43841ca61fd43b49f27f126d52a1, type: 3}
+  m_Script: {fileID: 11500000, guid: 8bb1cb0d0cbb45bd94c791d6ee5f0a07, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  _maxHealth: 20
+  _currentHealth: 20
+--- !u!114 &1860000000000000012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3561588123288436287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 421a8cabf6354a7e9f841a61f858439e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TeamMember
+  _teamId: 2
+  _teamRenderers:
+  - {fileID: 82686868499818149}
+  _teamMaterials:
+  - TeamId: 1
+    Material: {fileID: 2100000, guid: 2ce01c7b14cfe974cbd7cfd65e2df420, type: 2}
+  - TeamId: 2
+    Material: {fileID: 2100000, guid: 96260857ebbfed04e8b3f7c9cc90059b, type: 2}
+  - TeamId: 3
+    Material: {fileID: 2100000, guid: 195b126bfcb1fa4479fd7aae52eb58ec, type: 2}
+  - TeamId: 4
+    Material: {fileID: 2100000, guid: 2eb3f1b9d6a09494fa4a61768eeb99b5, type: 2}

@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class UnitDebugVisualizer : MonoBehaviour
 {
@@ -18,16 +21,22 @@ public class UnitDebugVisualizer : MonoBehaviour
     [SerializeField] private float _arrowHeadLength = 0.4f;
     [SerializeField] private float _arrowHeadAngle = 30f;
     [SerializeField] private Vector3 _arrowOffset = new Vector3(0f, 1.5f, 0f);
+    [SerializeField] private Vector3 _labelOffset = new Vector3(0f, 2.6f, 0f);
+    [SerializeField] private Color _labelColor = Color.white;
 
     private UnitStateController _stateController;
     private UnitCombat _combat;
     private SphereCollider _detectionTrigger;
+    private Health _health;
+    private TeamMember _teamMember;
 
     private void Awake()
     {
         _stateController = GetComponent<UnitStateController>();
         _combat = GetComponent<UnitCombat>();
         _detectionTrigger = GetComponent<SphereCollider>();
+        _health = GetComponent<Health>();
+        _teamMember = GetComponent<TeamMember>();
     }
 
     private void OnDrawGizmos()
@@ -41,6 +50,7 @@ public class UnitDebugVisualizer : MonoBehaviour
         DrawAttackRange();
         DrawDetectionRange();
         DrawTargetLine();
+        DrawDebugLabel();
     }
 
     private bool ShouldDrawDebug()
@@ -189,5 +199,46 @@ public class UnitDebugVisualizer : MonoBehaviour
 
         Gizmos.color = _targetLineColor;
         Gizmos.DrawLine(transform.position, _combat.CurrentTarget.position);
+    }
+
+    private void DrawDebugLabel()
+    {
+#if UNITY_EDITOR
+        if (_health == null)
+        {
+            _health = GetComponent<Health>();
+        }
+
+        if (_teamMember == null)
+        {
+            _teamMember = GetComponent<TeamMember>();
+        }
+
+        if (_health == null && _teamMember == null)
+        {
+            return;
+        }
+
+        GUIStyle style = new GUIStyle(EditorStyles.boldLabel)
+        {
+            alignment = TextAnchor.MiddleCenter,
+            normal = { textColor = _labelColor }
+        };
+
+        string labelText = BuildDebugLabel();
+        Handles.Label(transform.position + _labelOffset, labelText, style);
+#endif
+    }
+
+    private string BuildDebugLabel()
+    {
+        string teamText = _teamMember != null ? $"T{_teamMember.TeamId}" : "T?";
+
+        if (_health == null)
+        {
+            return teamText;
+        }
+
+        return $"{teamText} | HP {_health.CurrentHealth:0.#}/{_health.MaxHealth:0.#}";
     }
 }

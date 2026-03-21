@@ -10,7 +10,7 @@ public class UnitSpawner : MonoBehaviour
     
     [SerializeField] private GameObject _unitType; //for debug 
     
-    private class SpawnInfo //does this survive the conventions test? :0
+    [System.Serializable] private class SpawnInfo //does this survive the conventions test? :0
     {
         public GameObject unitPrefab;
         public int amount;
@@ -99,7 +99,7 @@ public class UnitSpawner : MonoBehaviour
         }
     }
 
-    public void CancelLatestCreation(GameObject unit)
+    public void UndoLatestUnitCreationReq(GameObject unit)
     {
         if (unit == null)
         {
@@ -128,6 +128,11 @@ public class UnitSpawner : MonoBehaviour
     
     private void SpawnUnit(GameObject unitToSpawn)
     {
+        if (unitToSpawn.GetComponent<UnitMovement>() == null)
+        {
+            Debug.LogError("Spawn Aborted: The prefab '{unitToSpawn.name}' is missing the required UnitMovement script");
+            return; 
+        }
         Vector3 newPos = transform.position + _entranceSpawnOffset;
         newPos.y = 0;
         GameObject unit_obj = Instantiate(unitToSpawn, newPos, transform.rotation);
@@ -136,10 +141,6 @@ public class UnitSpawner : MonoBehaviour
             return;
         }
         UnitMovement walker = unit_obj.GetComponent<UnitMovement>();
-        if (walker == null)
-        {
-            return;
-        }
         walker.MoveTo(transform.position + _outsideOffset);
         
         //TODO: needs waypoints in order to send to a final destination

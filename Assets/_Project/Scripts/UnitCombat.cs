@@ -137,7 +137,7 @@ public class UnitCombat : MonoBehaviour
     {
         for (int i = _targetsInDetectionRange.Count - 1; i >= 0; i--)
         {
-            if (!CanTarget(_targetsInDetectionRange[i]))
+            if (!CanTarget(_targetsInDetectionRange[i]) || !IsWithinDetectionRange(_targetsInDetectionRange[i]))
             {
                 _targetsInDetectionRange.RemoveAt(i);
             }
@@ -181,6 +181,21 @@ public class UnitCombat : MonoBehaviour
 
             _targetsInDetectionRange.Add(target);
         }
+    }
+
+    private bool IsWithinDetectionRange(Transform target)
+    {
+        if (target == null || _detectionTrigger == null || !_detectionTrigger.isTrigger)
+        {
+            return false;
+        }
+
+        Vector3 worldCenter = transform.TransformPoint(_detectionTrigger.center);
+        float maxScale = Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+        float radius = _detectionTrigger.radius * maxScale;
+        float distanceSqr = (target.position - worldCenter).sqrMagnitude;
+
+        return distanceSqr <= radius * radius;
     }
 
     private Transform GetClosestTargetInDetectionRange()

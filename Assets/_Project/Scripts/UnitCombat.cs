@@ -3,24 +3,33 @@ using UnityEngine;
 
 public class UnitCombat : MonoBehaviour
 {
+    [Header("Targeting")]
     [SerializeField] private string _enemyTag = "Enemy";
     [SerializeField] private float _attackRange = 2f;
 
-    private readonly List<Transform> _targetsInDetectionRange = new List<Transform>();
+    [Header("Attack")]
+    [SerializeField] private float _attackInterval = 1f;
+
+    private readonly List<Transform> _targetsInDetectionRange = new();
 
     private bool _isCommandedTarget;
+    private float _lastAttackTime = -999f;
+    private Animator _animator;
 
     public Transform CurrentTarget { get; private set; }
     public float AttackRange => _attackRange;
 
+    private void Awake()
+    {
+        _animator = GetComponent<Animator>();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag(_enemyTag))
+        if (!TryGetEnemyTransform(other, out Transform target))
         {
             return;
         }
-
-        Transform target = other.transform;
 
         if (!_targetsInDetectionRange.Contains(target))
         {
@@ -35,12 +44,11 @@ public class UnitCombat : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag(_enemyTag))
+        if (!TryGetEnemyTransform(other, out Transform target))
         {
             return;
         }
 
-        Transform target = other.transform;
         _targetsInDetectionRange.Remove(target);
 
         if (!_isCommandedTarget)
@@ -80,8 +88,30 @@ public class UnitCombat : MonoBehaviour
             return false;
         }
 
-        float distance = Vector3.Distance(transform.position, CurrentTarget.position);
-        return distance <= _attackRange;
+        float distanceSqr = (CurrentTarget.position - transform.position).sqrMagnitude;
+        return distanceSqr <= _attackRange * _attackRange;
+    }
+
+    public void TryAttack()
+    {
+        if (CurrentTarget == null)
+        {
+            return;
+        }
+
+        if (Time.time < _lastAttackTime + _attackInterval)
+        {
+            return;
+        }
+
+        _lastAttackTime = Time.time;
+        PerformAttack();
+    }
+
+    private void PerformAttack()
+    {
+        Debug.Log($"{name} attacks {CurrentTarget.name}");
+        // TODO: deal damage to enemy here.
     }
 
     private void CleanupTargets()
@@ -134,5 +164,25 @@ public class UnitCombat : MonoBehaviour
         }
 
         return closestTarget;
+    }
+
+    private bool TryGetEnemyTransform(Collider other, out Transform target)
+    {
+        target = null;
+
+        Enemy enemy = other.GetComponentInParent<Enemy>();
+        if (enemy != null)
+        {
+            target = enemy.transform;
+            return true;
+        }
+
+        if (!other.CompareTag(_enemyTag))
+        {
+            return false;
+        }
+
+        target = other.transform;
+        return true;
     }
 }

@@ -37,6 +37,31 @@ public class UnitMovement : MonoBehaviour
 
         _agent.isStopped = true;
     }
+    
+    public void RotateTowards(Vector3 worldPosition)
+    {
+        if (_agent == null)
+        {
+            return;
+        }
+
+        Vector3 direction = worldPosition - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        float maxDegreesDelta = _agent.angularSpeed * Time.deltaTime;
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRotation,
+            maxDegreesDelta
+        );
+    }
 
     public bool HasReachedDestination()
     {

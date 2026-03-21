@@ -137,9 +137,10 @@ public class UnitStateController : MonoBehaviour
         if (_movement != null)
         {
             _movement.Stop();
+            _movement.RotateTowards(_combat.CurrentTarget.position);
         }
-
-        // TODO: Real attack logic
+        
+        _combat.TryAttack();
     }
 
     private void UpdateAnimatorParameters()

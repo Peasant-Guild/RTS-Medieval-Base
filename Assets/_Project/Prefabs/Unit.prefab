@@ -304,6 +304,8 @@ MonoBehaviour:
   _arrowHeadLength: 0.4
   _arrowHeadAngle: 30
   _arrowOffset: {x: 0, y: 1.5, z: 0}
+  _labelOffset: {x: 0, y: 2.6, z: 0}
+  _labelColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &8609201143416214840
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,11 +14,14 @@ public class CombatController : MonoBehaviour
     private TeamMember _teamMember;
 
     public float AttackRange => _attackRange;
+    public float AttackDamage => _attackDamage;
+    public float AttackInterval => _attackInterval;
 
     private void Awake()
     {
         _health = GetComponent<Health>();
         _teamMember = GetComponent<TeamMember>();
+        _lastAttackTime = Time.time - Random.Range(0f, _attackInterval);
     }
 
     public bool IsTargetInAttackRange(Transform target)
@@ -47,6 +50,13 @@ public class CombatController : MonoBehaviour
         _lastAttackTime = Time.time;
         target.GetComponent<Health>().TakeDamage(_attackDamage);
         return true;
+    }
+
+    public void ConfigureAttack(float attackRange, float attackDamage, float attackInterval)
+    {
+        _attackRange = Mathf.Max(0.1f, attackRange);
+        _attackDamage = Mathf.Max(0f, attackDamage);
+        _attackInterval = Mathf.Max(0.01f, attackInterval);
     }
 
     private bool CanAttackTarget(Transform target)

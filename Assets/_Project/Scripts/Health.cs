@@ -14,12 +14,7 @@ public class Health : MonoBehaviour
 
     private void Awake()
     {
-        _maxHealth = Mathf.Max(1f, _maxHealth);
-
-        if (_currentHealth <= 0f || _currentHealth > _maxHealth)
-        {
-            _currentHealth = _maxHealth;
-        }
+        ClampHealthValues();
     }
 
     public void TakeDamage(float damage)
@@ -34,6 +29,29 @@ public class Health : MonoBehaviour
         if (!IsAlive)
         {
             Die();
+        }
+    }
+
+    public void ConfigureMaxHealth(float maxHealth, bool resetCurrentHealth)
+    {
+        _maxHealth = Mathf.Max(1f, maxHealth);
+
+        if (resetCurrentHealth)
+        {
+            _currentHealth = _maxHealth;
+            return;
+        }
+
+        _currentHealth = Mathf.Clamp(_currentHealth, 0f, _maxHealth);
+    }
+
+    private void ClampHealthValues()
+    {
+        _maxHealth = Mathf.Max(1f, _maxHealth);
+
+        if (_currentHealth <= 0f || _currentHealth > _maxHealth)
+        {
+            _currentHealth = _maxHealth;
         }
     }
 

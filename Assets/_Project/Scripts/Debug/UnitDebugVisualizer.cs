@@ -142,7 +142,7 @@ public class UnitDebugVisualizer : MonoBehaviour
         {
             UnitStateController.UnitState.Idle => _idleColor,
             UnitStateController.UnitState.Moving => _movingColor,
-            UnitStateController.UnitState.Following => _followingColor,
+            UnitStateController.UnitState.Pursuing => _followingColor,
             UnitStateController.UnitState.Attacking => _attackingColor,
             _ => _idleColor
         };

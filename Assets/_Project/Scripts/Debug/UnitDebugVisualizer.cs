@@ -25,7 +25,7 @@ public class UnitDebugVisualizer : MonoBehaviour
     [SerializeField] private Color _labelColor = Color.white;
 
     private UnitStateController _stateController;
-    private UnitCombat _combat;
+    private CombatController _combatController;
     private SphereCollider _detectionTrigger;
     private Health _health;
     private TeamMember _teamMember;
@@ -33,7 +33,7 @@ public class UnitDebugVisualizer : MonoBehaviour
     private void Awake()
     {
         _stateController = GetComponent<UnitStateController>();
-        _combat = GetComponent<UnitCombat>();
+        _combatController = GetComponent<CombatController>();
         _detectionTrigger = GetComponent<SphereCollider>();
         _health = GetComponent<Health>();
         _teamMember = GetComponent<TeamMember>();
@@ -150,18 +150,18 @@ public class UnitDebugVisualizer : MonoBehaviour
 
     private void DrawAttackRange()
     {
-        if (_combat == null)
+        if (_combatController == null)
         {
-            _combat = GetComponent<UnitCombat>();
+            _combatController = GetComponent<CombatController>();
         }
 
-        if (_combat == null)
+        if (_combatController == null)
         {
             return;
         }
 
         Gizmos.color = _attackRangeColor;
-        Gizmos.DrawWireSphere(transform.position, _combat.AttackRange);
+        Gizmos.DrawWireSphere(transform.position, _combatController.AttackRange);
     }
 
     private void DrawDetectionRange()
@@ -187,18 +187,18 @@ public class UnitDebugVisualizer : MonoBehaviour
 
     private void DrawTargetLine()
     {
-        if (_combat == null)
+        if (_stateController == null)
         {
-            _combat = GetComponent<UnitCombat>();
+            _stateController = GetComponent<UnitStateController>();
         }
 
-        if (_combat == null || _combat.CurrentTarget == null)
+        if (_stateController == null || _stateController.CurrentTarget == null)
         {
             return;
         }
 
         Gizmos.color = _targetLineColor;
-        Gizmos.DrawLine(transform.position, _combat.CurrentTarget.position);
+        Gizmos.DrawLine(transform.position, _stateController.CurrentTarget.position);
     }
 
     private void DrawDebugLabel()

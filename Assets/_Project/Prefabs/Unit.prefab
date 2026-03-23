@@ -17,7 +17,8 @@ GameObject:
   - component: {fileID: 3654420146486413931}
   - component: {fileID: 1860000000000000001}
   - component: {fileID: 1860000000000000002}
-  - component: {fileID: 6868661832477982899}
+  - component: {fileID: 1860000000000000003}
+  - component: {fileID: 1860000000000000004}
   - component: {fileID: 6045019108368813326}
   - component: {fileID: 3046654800869269061}
   - component: {fileID: 6269404934598941834}
@@ -210,7 +211,7 @@ MonoBehaviour:
     Material: {fileID: 2100000, guid: 195b126bfcb1fa4479fd7aae52eb58ec, type: 2}
   - TeamId: 4
     Material: {fileID: 2100000, guid: 2eb3f1b9d6a09494fa4a61768eeb99b5, type: 2}
---- !u!114 &6868661832477982899
+--- !u!114 &1860000000000000003
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -219,9 +220,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 3499283322596585529}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88ec99cedb6b52647ab11a5b308cdaac, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e6d4c7322cb4b5b84c2f62f2cbdcc77, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnitCombat
+  m_EditorClassIdentifier: Assembly-CSharp::TargetDetector
+--- !u!114 &1860000000000000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3499283322596585529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f1e56770084621a999e8be05e26cc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatController
   _attackRange: 5
   _attackDamage: 4
   _attackInterval: 1

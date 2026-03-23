@@ -217,9 +217,9 @@ public class UnitSelectionManager : MonoBehaviour
             }
 
             UnitStateController stateController = unit.GetComponent<UnitStateController>();
-            UnitCombat unitCombat = unit.GetComponent<UnitCombat>();
+            TargetDetector targetDetector = unit.GetComponent<TargetDetector>();
 
-            if (stateController != null && unitCombat != null && unitCombat.CanTarget(target))
+            if (stateController != null && targetDetector != null && targetDetector.CanTarget(target))
             {
                 stateController.FollowTarget(target);
                 commandedAnyUnits = true;

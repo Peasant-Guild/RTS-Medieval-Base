@@ -190,11 +190,10 @@ public class UnitSelectionManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
         {
-            GameObject clickedUnit = hit.collider.gameObject;
+            TeamMember clickedTeamMember = hit.collider.GetComponentInParent<TeamMember>();
 
-            if (clickedUnit != null && clickedUnit.CompareTag("Enemy"))
+            if (clickedTeamMember != null && CommandSelectedUnitsToFollow(clickedTeamMember.transform))
             {
-                CommandSelectedUnitsToFollow(clickedUnit.transform);
                 return;
             }
         }
@@ -206,8 +205,10 @@ public class UnitSelectionManager : MonoBehaviour
         }
     }
     
-    private void CommandSelectedUnitsToFollow(Transform target)
+    private bool CommandSelectedUnitsToFollow(Transform target)
     {
+        bool commandedAnyUnits = false;
+
         foreach (GameObject unit in unitsSelected)
         {
             if (unit == null)
@@ -216,12 +217,16 @@ public class UnitSelectionManager : MonoBehaviour
             }
 
             UnitStateController stateController = unit.GetComponent<UnitStateController>();
+            UnitCombat unitCombat = unit.GetComponent<UnitCombat>();
 
-            if (stateController != null)
+            if (stateController != null && unitCombat != null && unitCombat.CanTarget(target))
             {
                 stateController.FollowTarget(target);
+                commandedAnyUnits = true;
             }
         }
+
+        return commandedAnyUnits;
     }
 
     private void CommandSelectedUnitsToMove(Vector3 destination)

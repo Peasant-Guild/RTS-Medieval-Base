@@ -69,7 +69,7 @@ public class UnitStateController : MonoBehaviour
 
     public void FollowTarget(Transform target)
     {
-        if (target == null || _combat == null)
+        if (target == null || _combat == null || !_combat.CanTarget(target))
         {
             return;
         }

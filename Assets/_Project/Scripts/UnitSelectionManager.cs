@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,7 +15,9 @@ public class UnitSelectionManager : MonoBehaviour
     [SerializeField] private GameObject _groundMarker;
     [SerializeField] private RectTransform _selectBox;
     [SerializeField] private float _dragThreshold = 10f;
-    [SerializeField] private float scrollSensWeakener = 0.005f;
+    [SerializeField] private float _scrollSensWeakener = 0.005f;
+    [SerializeField] private float _additionalUnitRowGapping = 0f;
+    [SerializeField] private float _additionalUnitLineGapping = 0f;
     
     private Camera _cam;
     private Vector2 _mousePosition;
@@ -258,7 +261,7 @@ public class UnitSelectionManager : MonoBehaviour
     private void HandleScroll() //TODO: Freeze CameraController (feature not yet implemented)
     {
         
-        float scrollValue = Mouse.current.scroll.ReadValue().y * scrollSensWeakener;
+        float scrollValue = Mouse.current.scroll.ReadValue().y * _scrollSensWeakener;
         if (scrollValue < 0.001f && scrollValue > -0.001f)
         {
             return;
@@ -304,8 +307,10 @@ public class UnitSelectionManager : MonoBehaviour
         int amountOfRows = unitCount / amountOfLines;
         int leftOverUnits = unitCount % amountOfLines;
         List<Vector3> positions = new List<Vector3>();
-        int startOfRowOffset = -amountOfRows / 2;
+        int startOfRowOffset = (-amountOfRows / 2);
         int endOfRowOffset = amountOfRows / 2 + amountOfRows % 2;
+        float rowSpacing = 1f + _additionalUnitRowGapping;
+        float lineSpacing = 1f + _additionalUnitLineGapping;
 
         Vector3 currentMouseWorldPos = GetCurrentMouseWorldPos();
         Vector3 direction = currentMouseWorldPos - _dragStartPos;
@@ -322,7 +327,7 @@ public class UnitSelectionManager : MonoBehaviour
             for (int row = startOfRowOffset; row < endOfRowOffset; row++)
             {
                 Vector3 localOffset =
-                    new Vector3(row, 0f, -line); 
+                    new Vector3(row * rowSpacing, 0f, -line * lineSpacing); 
                 
                 Vector3 rotatedOffset = targetRotation * localOffset;
                 
@@ -337,7 +342,7 @@ public class UnitSelectionManager : MonoBehaviour
             if (i % 2 == 0)
             {
                 Vector3 localOffset =
-                    new Vector3(startOfRowOffset + i, 0f, -amountOfLines);
+                    new Vector3((startOfRowOffset + (i/2)) * rowSpacing, 0f, -amountOfLines * lineSpacing);
                 Vector3 rotatedOffset = targetRotation * localOffset;
                 
                 Vector3 finalPos = target + rotatedOffset;
@@ -346,7 +351,7 @@ public class UnitSelectionManager : MonoBehaviour
             }
             else
             {
-                Vector3 localOffset = new Vector3(endOfRowOffset - i, 0f, -amountOfLines);
+                Vector3 localOffset = new Vector3((endOfRowOffset - 1 - (i/2)) * rowSpacing, 0f, -amountOfLines * lineSpacing);
                 Vector3 rotatedOffset = targetRotation * localOffset;
                 
                 Vector3 finalPos = target + rotatedOffset;

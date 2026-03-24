@@ -264,15 +264,25 @@ public class UnitSelectionManager : MonoBehaviour
         Vector3 currentMouseWorldPos = GetCurrentMouseWorldPos();
         Vector3 direction = currentMouseWorldPos - _dragStartPos;
         direction.y = 0f;
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+        Quaternion targetRotation = Quaternion.identity; 
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            targetRotation = Quaternion.LookRotation(direction);
+        }
+        
         for (int line = 0; line < amountOfLines; line++)
         {
             for (int row = startOfRowOffset; row < endOfRowOffset; row++)
             {
-                Vector3 currentOffset =
-                    new Vector3(target.x + row, target.y,
-                        target.z - line); //TODO: navigate higher/lower y levels (also in the next loop)
-                positions.Add(currentOffset);
+                Vector3 localOffset =
+                    new Vector3(row, 0f, -line); 
+                
+                Vector3 rotatedOffset = targetRotation * localOffset;
+                
+                Vector3 finalPos = target + rotatedOffset;
+                finalPos.y = target.y; //TODO: navigate higher/lower y levels (also in the next loops)
+                positions.Add(finalPos);
             }
         }
 
@@ -280,14 +290,22 @@ public class UnitSelectionManager : MonoBehaviour
         {
             if (i % 2 == 0)
             {
-                Vector3 currentOffset =
-                    new Vector3(target.x + startOfRowOffset + i, target.y, target.z - amountOfLines);
-                positions.Add(currentOffset);
+                Vector3 localOffset =
+                    new Vector3(startOfRowOffset + i, 0f, -amountOfLines);
+                Vector3 rotatedOffset = targetRotation * localOffset;
+                
+                Vector3 finalPos = target + rotatedOffset;
+                finalPos.y = target.y;
+                positions.Add(finalPos);
             }
             else
             {
-                Vector3 currentOffset = new Vector3(target.x + endOfRowOffset - i, target.y, target.z - amountOfLines);
-                positions.Add(currentOffset);
+                Vector3 localOffset = new Vector3(endOfRowOffset - i, 0f, -amountOfLines);
+                Vector3 rotatedOffset = targetRotation * localOffset;
+                
+                Vector3 finalPos = target + rotatedOffset;
+                finalPos.y = target.y;
+                positions.Add(finalPos);
             }
         }
         

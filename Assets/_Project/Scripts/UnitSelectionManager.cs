@@ -186,32 +186,6 @@ public class UnitSelectionManager : MonoBehaviour
         }
     }
 
-    private void HandleRightClickMovementMarker()
-    {
-        if (Mouse.current == null || !Mouse.current.rightButton.wasPressedThisFrame || unitsSelected.Count == 0)
-        {
-            return;
-        }
-
-        Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
-        {
-            TeamMember clickedTeamMember = hit.collider.GetComponentInParent<TeamMember>();
-
-            if (clickedTeamMember != null && CommandSelectedUnitsToFollow(clickedTeamMember.transform))
-            {
-                return;
-            }
-        }
-
-        if (Physics.Raycast(ray, out RaycastHit groundHit, Mathf.Infinity, _ground))
-        {
-            CommandSelectedUnitsToMove(groundHit.point);
-            ShowGroundMarker(groundHit.point);
-        }
-    }
-
     private void HandleRightClickMovementRequest()
     {
         if (Mouse.current == null || (!Mouse.current.rightButton.wasPressedThisFrame &&
@@ -241,6 +215,7 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void HandleRightClickPressed()
     {
+        
         _currentLineCount = 1;
         Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
@@ -250,12 +225,14 @@ public class UnitSelectionManager : MonoBehaviour
 
             if (clickedTeamMember != null && CommandSelectedUnitsToFollow(clickedTeamMember.transform))
             {
+                ShowGroundMarker(_mousePosition3D);
                 _isRightDragging = false;
                 return;
             }
         }
         _dragStartPos = GetCurrentMouseWorldPos();
         _isRightDragging = true;
+        ShowGroundMarker(_mousePosition3D);
     }
 
     private void HandleRightClickHeld()
@@ -278,7 +255,7 @@ public class UnitSelectionManager : MonoBehaviour
         _isRightDragging = false;
     }
 
-    private void HandleScroll()
+    private void HandleScroll() //TODO: Freeze CameraController (feature not yet implemented)
     {
         
         float scrollValue = Mouse.current.scroll.ReadValue().y * scrollSensWeakener;
@@ -416,24 +393,6 @@ public class UnitSelectionManager : MonoBehaviour
         }
 
         return commandedAnyUnits;
-    }
-
-    private void CommandSelectedUnitsToMove(Vector3 destination)
-    {
-        foreach (GameObject unit in unitsSelected)
-        {
-            if (unit == null)
-            {
-                continue;
-            }
-
-            UnitStateController stateController = unit.GetComponent<UnitStateController>();
-
-            if (stateController != null)
-            {
-                stateController.MoveTo(destination);
-            }
-        }
     }
 
     private void SelectSingleUnit(GameObject unit)

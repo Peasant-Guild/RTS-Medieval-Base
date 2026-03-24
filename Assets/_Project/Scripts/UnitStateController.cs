@@ -6,11 +6,14 @@ public class UnitStateController : MonoBehaviour
     {
         Idle,
         Moving,
-        Following,
+        Pursuing,
         Attacking
     }
 
     [SerializeField] private Animator _animator;
+
+    private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
+    private static readonly int AttackTriggerHash = Animator.StringToHash("AttackTrigger");
 
     private UnitMovement _movement;
     private CombatController _combatController;
@@ -45,8 +48,8 @@ public class UnitStateController : MonoBehaviour
                 UpdateMovingState();
                 break;
 
-            case UnitState.Following:
-                UpdateFollowingState();
+            case UnitState.Pursuing:
+                UpdatePursuingState();
                 break;
 
             case UnitState.Attacking:
@@ -78,7 +81,7 @@ public class UnitStateController : MonoBehaviour
 
         CurrentTarget = target;
         _isCommandedTarget = true;
-        ChangeState(UnitState.Following);
+        ChangeState(UnitState.Pursuing);
     }
 
     public void ChangeState(UnitState newState)
@@ -90,7 +93,7 @@ public class UnitStateController : MonoBehaviour
     {
         if (ResolveCurrentTarget())
         {
-            ChangeState(UnitState.Following);
+            ChangeState(UnitState.Pursuing);
         }
     }
 
@@ -102,7 +105,7 @@ public class UnitStateController : MonoBehaviour
         }
     }
 
-    private void UpdateFollowingState()
+    private void UpdatePursuingState()
     {
         if (_combatController == null || !ResolveCurrentTarget())
         {
@@ -131,7 +134,7 @@ public class UnitStateController : MonoBehaviour
 
         if (_combatController == null || !_combatController.IsTargetInAttackRange(CurrentTarget))
         {
-            ChangeState(UnitState.Following);
+            ChangeState(UnitState.Pursuing);
             return;
         }
 
@@ -140,8 +143,13 @@ public class UnitStateController : MonoBehaviour
             _movement.Stop();
             _movement.RotateTowards(CurrentTarget.position);
         }
-        
-        _combatController.TryAttack(CurrentTarget);
+
+        bool didAttack = _combatController.TryAttack(CurrentTarget);
+
+        if (didAttack && _animator != null)
+        {
+            _animator.SetTrigger(AttackTriggerHash);
+        }
     }
 
     private void UpdateAnimatorParameters()
@@ -151,9 +159,7 @@ public class UnitStateController : MonoBehaviour
             return;
         }
 
-        _animator.SetBool("IsMoving", CurrentState == UnitState.Moving || CurrentState == UnitState.Following);
-        _animator.SetBool("IsFollowing", CurrentState == UnitState.Following);
-        _animator.SetBool("IsAttacking", CurrentState == UnitState.Attacking);
+        _animator.SetBool(IsMovingHash, CurrentState == UnitState.Moving || CurrentState == UnitState.Pursuing);
     }
 
     private bool ResolveCurrentTarget()

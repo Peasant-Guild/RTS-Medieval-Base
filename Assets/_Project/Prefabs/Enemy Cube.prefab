@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7320347205475035814}
   - component: {fileID: 1860000000000000011}
   - component: {fileID: 1860000000000000012}
+  - component: {fileID: 8648130457566238681}
   m_Layer: 7
   m_Name: Enemy Cube
   m_TagString: Untagged
@@ -180,3 +181,28 @@ MonoBehaviour:
     Material: {fileID: 2100000, guid: 195b126bfcb1fa4479fd7aae52eb58ec, type: 2}
   - TeamId: 4
     Material: {fileID: 2100000, guid: 2eb3f1b9d6a09494fa4a61768eeb99b5, type: 2}
+--- !u!114 &8648130457566238681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3561588123288436287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1691ef95eb448dc4b9304d6095e4f42e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitDebugVisualizer
+  _idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  _movingColor: {r: 0, g: 1, b: 1, a: 1}
+  _followingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _attackingColor: {r: 1, g: 0, b: 0, a: 1}
+  _attackRangeColor: {r: 1, g: 0, b: 0, a: 1}
+  _detectionRangeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _targetLineColor: {r: 1, g: 1, b: 1, a: 1}
+  _arrowLength: 2
+  _arrowHeadLength: 0.4
+  _arrowHeadAngle: 30
+  _arrowOffset: {x: 0, y: 1.5, z: 0}
+  _labelOffset: {x: 0, y: 2.6, z: 0}
+  _labelColor: {r: 1, g: 1, b: 1, a: 1}

@@ -143,8 +143,10 @@ public class UnitStateController : MonoBehaviour
             _movement.Stop();
             _movement.RotateTowards(CurrentTarget.position);
         }
-        
-        if (_combatController.TryAttack(CurrentTarget) && _animator != null)
+
+        bool didAttack = _combatController.TryAttack(CurrentTarget);
+
+        if (didAttack && _animator != null)
         {
             _animator.SetTrigger(AttackTriggerHash);
         }

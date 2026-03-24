@@ -5,6 +5,9 @@ using UnityEngine;
 public class CombatController : MonoBehaviour
 {
     private const float MaxInitialAttackOffset = 0.5f;
+    private const float MinAttackRange = 0.1f;
+    private const float MinAttackDamage = 0f;
+    private const float MinAttackInterval = 0.01f;
 
     [Header("Attack")]
     [SerializeField] private float _attackRange = 2f;
@@ -56,9 +59,9 @@ public class CombatController : MonoBehaviour
 
     public void ConfigureAttack(float attackRange, float attackDamage, float attackInterval)
     {
-        _attackRange = Mathf.Max(0.1f, attackRange);
-        _attackDamage = Mathf.Max(0f, attackDamage);
-        _attackInterval = Mathf.Max(0.01f, attackInterval);
+        _attackRange = Mathf.Max(MinAttackRange, attackRange);
+        _attackDamage = Mathf.Max(MinAttackDamage, attackDamage);
+        _attackInterval = Mathf.Max(MinAttackInterval, attackInterval);
     }
 
     private bool CanAttackTarget(Transform target)

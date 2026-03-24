@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
+    private const float MinDetectionRange = 0.1f;
+
     [SerializeField] private GameObject _selectionIndicator;
     [SerializeField] private UnitDefinition _definition;
 
@@ -132,7 +134,7 @@ public class Unit : MonoBehaviour
 
         if (_detectionTrigger != null)
         {
-            _detectionTrigger.radius = Mathf.Max(0.1f, _definition.DetectionRange);
+            _detectionTrigger.radius = Mathf.Max(MinDetectionRange, _definition.DetectionRange);
         }
 
         if (_animator != null && _definition.AnimatorController != null)

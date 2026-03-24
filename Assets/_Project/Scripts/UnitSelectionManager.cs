@@ -16,10 +16,12 @@ public class UnitSelectionManager : MonoBehaviour
     [SerializeField] private float _dragThreshold = 10f;
 
     private Camera _cam;
-    private Vector2 _mousePosition;
+    private Vector3 _mousePosition;
     private Vector2 _boxStartPos;
     private Vector2 _boxDimensions;
-    private bool _isDragging;
+    private Vector3 _dragStartPos;
+    private bool _isLeftDragging;
+    private bool _isRightDragging;
 
     private void Awake()
     {
@@ -53,6 +55,7 @@ public class UnitSelectionManager : MonoBehaviour
     {
         HandleLeftClickSelection();
         HandleRightClickMovementMarker();
+        HandleRightClickMovementRequest();
     }
 
     private void HandleLeftClickSelection()
@@ -61,11 +64,11 @@ public class UnitSelectionManager : MonoBehaviour
                                       !Mouse.current.leftButton.isPressed &&
                                       !Mouse.current.leftButton.wasReleasedThisFrame))
         {
-            _isDragging = false;
+            _isLeftDragging = false;
             return;
         }
 
-        _mousePosition = Mouse.current.position.ReadValue();
+        _mousePosition = GetCurrentMouseWorldPos();
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
@@ -86,15 +89,15 @@ public class UnitSelectionManager : MonoBehaviour
     private void HandleLeftClickPressed()
     {
         _boxStartPos = _mousePosition;
-        _isDragging = false;
+        _isLeftDragging = false;
         CleanBox();
     }
 
     private void HandleLeftClickHeld()
     {
-        if (!_isDragging && Vector2.Distance(_boxStartPos, _mousePosition) > _dragThreshold)
+        if (!_isLeftDragging && Vector2.Distance(_boxStartPos, _mousePosition) > _dragThreshold)
         {
-            _isDragging = true;
+            _isLeftDragging = true;
 
             if (_selectBox != null)
             {
@@ -102,7 +105,7 @@ public class UnitSelectionManager : MonoBehaviour
             }
         }
 
-        if (_isDragging)
+        if (_isLeftDragging)
         {
             UpdateSelectionBoxVisual();
             UpdateBoxSelection();
@@ -111,12 +114,12 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void HandleLeftClickReleased()
     {
-        if (!_isDragging)
+        if (!_isLeftDragging)
         {
             HandleBasicSelect();
         }
 
-        _isDragging = false;
+        _isLeftDragging = false;
         _boxStartPos = Vector2.zero;
         CleanBox();
     }
@@ -203,6 +206,106 @@ public class UnitSelectionManager : MonoBehaviour
             CommandSelectedUnitsToMove(groundHit.point);
             ShowGroundMarker(groundHit.point);
         }
+    }
+
+    private void HandleRightClickMovementRequest()
+    {
+        if (Mouse.current == null || (!Mouse.current.rightButton.wasPressedThisFrame &&
+                                     !Mouse.current.rightButton.isPressed &&
+                                     !Mouse.current.rightButton.wasReleasedThisFrame))
+        {
+            _isRightDragging = false;
+            return;
+        }
+        _mousePosition = Mouse.current.position.ReadValue();
+
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            HandleRightClickPressed();
+        }
+
+        if (Mouse.current.rightButton.isPressed)
+        {
+            HandleRightClickHeld();
+        }
+
+        if (Mouse.current.rightButton.wasReleasedThisFrame)
+        {
+            HandleRightClickReleased();
+        }
+    }
+
+    private void HandleRightClickPressed()
+    {
+        _dragStartPos = Mouse.current.position.ReadValue();
+    }
+
+    private void VisualiseFormation(int amountOfLines, Transform target)
+    {
+        
+    }
+    private void SendInFormation(int amountOfLines, Vector3 target)
+    {
+        
+    }
+
+    private List<Vector3> CreateFormation(int amountOfLines, Vector3 target)
+    {
+        //TODO: acknowledge borders
+        int unitCount = unitsSelected.Count;
+        int amountOfRows = unitCount / amountOfLines;
+        int leftOverUnits = unitCount % amountOfLines;
+        List<Vector3> positions = new List<Vector3>();
+        int startOfRowOffset = -amountOfRows / 2;
+        int endOfRowOffset = amountOfRows / 2 + amountOfRows % 2;
+
+
+
+        Vector3 currentMouseWorldPos = GetCurrentMouseWorldPos();
+        Vector3 direction = currentMouseWorldPos - _dragStartPos;
+        direction.y = 0f;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        for (int line = 0; line < amountOfLines; line++)
+        {
+            for (int row = startOfRowOffset; row < endOfRowOffset; row++)
+            {
+                Vector3 currentOffset =
+                    new Vector3(target.x + row, target.y,
+                        target.z - line); //TODO: navigate higher/lower y levels (also in the next loop)
+                positions.Add(currentOffset);
+            }
+        }
+
+        for (int i = 0; i < leftOverUnits; i++)
+        {
+            if (i % 2 == 0)
+            {
+                Vector3 currentOffset =
+                    new Vector3(target.x + startOfRowOffset + i, target.y, target.z - amountOfLines);
+                positions.Add(currentOffset);
+            }
+            else
+            {
+                Vector3 currentOffset = new Vector3(target.x + endOfRowOffset - i, target.y, target.z - amountOfLines);
+                positions.Add(currentOffset);
+            }
+        }
+        
+        
+        return positions;
+    }
+
+    private Vector3 GetCurrentMouseWorldPos()
+    {
+        Vector2 mousePos2D = Mouse.current.position.ReadValue();
+        
+        Ray ray = _cam.ScreenPointToRay(mousePos2D);
+        
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
+        {
+            return hit.point;
+        }
+        return Vector3.zero; //shouldn't reach
     }
     
     private bool CommandSelectedUnitsToFollow(Transform target)

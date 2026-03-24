@@ -14,14 +14,17 @@ public class UnitSelectionManager : MonoBehaviour
     [SerializeField] private GameObject _groundMarker;
     [SerializeField] private RectTransform _selectBox;
     [SerializeField] private float _dragThreshold = 10f;
-
+    [SerializeField] private float scrollSensWeakener = 0.005f;
+    
     private Camera _cam;
-    private Vector3 _mousePosition;
+    private Vector2 _mousePosition;
+    private Vector3 _mousePosition3D;
     private Vector2 _boxStartPos;
     private Vector2 _boxDimensions;
     private Vector3 _dragStartPos;
     private bool _isLeftDragging;
     private bool _isRightDragging;
+    private int _currentLineCount;
 
     private void Awake()
     {
@@ -54,7 +57,7 @@ public class UnitSelectionManager : MonoBehaviour
     private void Update()
     {
         HandleLeftClickSelection();
-        HandleRightClickMovementMarker();
+        // HandleRightClickMovementMarker();
         HandleRightClickMovementRequest();
     }
 
@@ -68,8 +71,9 @@ public class UnitSelectionManager : MonoBehaviour
             return;
         }
 
-        _mousePosition = GetCurrentMouseWorldPos();
-
+        _mousePosition = Mouse.current.position.ReadValue();
+        _mousePosition3D = GetCurrentMouseWorldPos();
+        
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             HandleLeftClickPressed();
@@ -218,7 +222,7 @@ public class UnitSelectionManager : MonoBehaviour
             return;
         }
         _mousePosition = Mouse.current.position.ReadValue();
-
+        _mousePosition3D = GetCurrentMouseWorldPos();
         if (Mouse.current.rightButton.wasPressedThisFrame)
         {
             HandleRightClickPressed();
@@ -237,16 +241,83 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void HandleRightClickPressed()
     {
-        _dragStartPos = Mouse.current.position.ReadValue();
+        _currentLineCount = 1;
+        Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
+        {
+            TeamMember clickedTeamMember = hit.collider.GetComponentInParent<TeamMember>();
+
+            if (clickedTeamMember != null && CommandSelectedUnitsToFollow(clickedTeamMember.transform))
+            {
+                _isRightDragging = false;
+                return;
+            }
+        }
+        _dragStartPos = GetCurrentMouseWorldPos();
+        _isRightDragging = true;
     }
 
-    private void VisualiseFormation(int amountOfLines, Transform target)
+    private void HandleRightClickHeld()
+    {
+        if (!_isRightDragging)
+        {
+            return;
+        }
+        HandleScroll();
+        VisualiseFormation(_currentLineCount, _dragStartPos);
+    }
+
+    private void HandleRightClickReleased()
+    {
+        if (!_isRightDragging)
+        {
+            return;
+        }
+        SendInFormation(_currentLineCount, _dragStartPos);
+        _isRightDragging = false;
+    }
+
+    private void HandleScroll()
     {
         
+        float scrollValue = Mouse.current.scroll.ReadValue().y * scrollSensWeakener;
+        if (scrollValue < 0.001f && scrollValue > -0.001f)
+        {
+            return;
+        }
+        if (Mouse.current.scroll.ReadValue().y > 0)
+        {
+            _currentLineCount++;
+        }
+        else
+        {
+            _currentLineCount--;
+        }
+        int maxLines = Mathf.Min(5, unitsSelected.Count);
+        _currentLineCount = Mathf.Clamp(_currentLineCount, 1, maxLines);
+    }
+    private void VisualiseFormation(int amountOfLines, Vector3 target)
+    {
+        List<Vector3> previewPositions = CreateFormation(amountOfLines, target);
+
+        foreach (Vector3 pos in previewPositions)
+        {
+            Debug.DrawRay(pos, Vector3.up * 2f, Color.green); 
+        }
     }
     private void SendInFormation(int amountOfLines, Vector3 target)
     {
-        
+        List<Vector3> formation = CreateFormation(amountOfLines, target);
+        for (int i = 0; i < unitsSelected.Count; i++)
+        {
+            if (i >= formation.Count) break;
+            UnitStateController stateController = unitsSelected[i].GetComponent<UnitStateController>();
+            if (stateController != null)
+            {
+                stateController.MoveTo(formation[i]);
+            }
+        }
     }
 
     private List<Vector3> CreateFormation(int amountOfLines, Vector3 target)
@@ -258,8 +329,6 @@ public class UnitSelectionManager : MonoBehaviour
         List<Vector3> positions = new List<Vector3>();
         int startOfRowOffset = -amountOfRows / 2;
         int endOfRowOffset = amountOfRows / 2 + amountOfRows % 2;
-
-
 
         Vector3 currentMouseWorldPos = GetCurrentMouseWorldPos();
         Vector3 direction = currentMouseWorldPos - _dragStartPos;
@@ -308,7 +377,6 @@ public class UnitSelectionManager : MonoBehaviour
                 positions.Add(finalPos);
             }
         }
-        
         
         return positions;
     }

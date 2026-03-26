@@ -6,17 +6,24 @@ public class UnitSpawner : MonoBehaviour
 {
     
     [SerializeField] private GameObject _unitType; //for debug 
-    
+    [SerializeField] private int _shiftClickAmount = 5;
     [System.Serializable] private class SpawnInfo //does this survive the conventions test? :0
     {
         public GameObject unitPrefab;
+        public UnitDefinition unitDefinition;
         public int amount;
-        public float spawnTime;
-        public SpawnInfo(GameObject unit, int amount, float spawnTime)
+        public SpawnInfo(GameObject unit, int amount = 1)
         {
             this.unitPrefab = unit;
+            if (this.unitPrefab != null)
+            {
+                this.unitDefinition = this.unitPrefab.GetComponent<UnitDefinition>();
+            }
+            else
+            {
+                Debug.LogError("Spawn Aborted: were missing the required Unit Definition component");
+            }
             this.amount = amount;
-            this.spawnTime = spawnTime;
         }
     }
     
@@ -72,16 +79,16 @@ public class UnitSpawner : MonoBehaviour
     private void LoadNextUnit()
     {
         _currentUnit = _unitsToSpawn[0].unitPrefab;
-        _spawnCountdownTimer = _unitsToSpawn[0].spawnTime + _spawnCountdownTimer; //conserve overall time frame (carry over negatives)
+        _spawnCountdownTimer = _unitsToSpawn[0].unitDefinition.SpawnTime + _spawnCountdownTimer; //conserve overall time frame (carry over negatives)
         if (--_unitsToSpawn[0].amount == 0)
         {
             _unitsToSpawn.RemoveAt(0);
         }
     }
     
-    public void CallSpawn(GameObject unit, int amount = 1, float spawnTime = 2f)
+    public void CallSpawn(GameObject unit, int amount = 1)
     {
-        if (unit == null || amount <= 0 || spawnTime <= 0f)
+        if (unit == null || amount <= 0)
         {
             return;
         }
@@ -92,7 +99,7 @@ public class UnitSpawner : MonoBehaviour
         }
         else
         {
-            _unitsToSpawn.Add(new SpawnInfo(unit, amount, spawnTime));
+            _unitsToSpawn.Add(new SpawnInfo(unit, amount));
         }
     }
 
@@ -127,7 +134,7 @@ public class UnitSpawner : MonoBehaviour
     {
         if (unitToSpawn.GetComponent<UnitMovement>() == null)
         {
-            Debug.LogError("Spawn Aborted: The prefab '{unitToSpawn.name}' is missing the required UnitMovement script");
+            Debug.LogError("Spawn Aborted: were missing the required UnitMovement component");
             return; 
         }
         Vector3 newPos = transform.position + _entranceSpawnOffset;

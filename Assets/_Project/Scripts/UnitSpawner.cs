@@ -6,34 +6,16 @@ using UnityEngine.InputSystem;
 public class UnitSpawner : MonoBehaviour
 {
     
-    [SerializeField] private GameObject _unitType; //for debug (A temporary solution until a menu is configured - see OnMouseDown) 
+    [SerializeField] private UnitDefinition _unitDef; //for debug (A temporary solution until a menu is configured - see OnMouseDown) 
     [SerializeField] private int _shiftClickAmount = 5;
     [SerializeField] private int _spawnTeamId = 1;
     [System.Serializable] private class SpawnInfo //does this survive the conventions test? :0
     {
-        public GameObject unitPrefab;
         public UnitDefinition unitDefinition;
         public int amount;
-        public SpawnInfo(GameObject unit, int amount = 1)
+        public SpawnInfo(UnitDefinition unitDef, int amount = 1)
         {
-            this.unitPrefab = unit;
-            
-            if (this.unitPrefab != null)
-            {
-                Unit unitComponent = this.unitPrefab.GetComponent<Unit>();
-                if (unitComponent != null)
-                {
-                    this.unitDefinition = unitComponent.Definition;
-                }
-                else
-                {
-                    Debug.LogError("Spawn Aborted: we are missing the required Unit Definition component");
-                }
-            }
-            else
-            {
-                Debug.LogError("Spawn Aborted: we are missing the required Unit component");
-            }
+            this.unitDefinition = unitDef;
             this.amount = amount;
         }
     }
@@ -46,7 +28,7 @@ public class UnitSpawner : MonoBehaviour
     [SerializeField] private Vector3 _outsideOffset; //walk out position (creation animation)
     
     
-    private GameObject _currentUnit = null;
+    private UnitDefinition _currentUnit = null;
     
     [SerializeField] private List<SpawnInfo> _unitsToSpawn =  new List<SpawnInfo>();
     
@@ -60,11 +42,11 @@ public class UnitSpawner : MonoBehaviour
     {
         if (Keyboard.current.shiftKey.isPressed)
         {
-            CallSpawn(_unitType, _shiftClickAmount);
+            CallSpawn(_unitDef, _shiftClickAmount);
         }
         else
         {
-            CallSpawn(_unitType);
+            CallSpawn(_unitDef);
         }
     }
     
@@ -99,7 +81,7 @@ public class UnitSpawner : MonoBehaviour
 
     private void LoadNextUnit()
     {
-        _currentUnit = _unitsToSpawn[0].unitPrefab;
+        _currentUnit = _unitsToSpawn[0].unitDefinition;
         _spawnCountdownTimer = _unitsToSpawn[0].unitDefinition.SpawnTime + _spawnCountdownTimer; //conserve overall time frame (carry over negatives)
         if (--_unitsToSpawn[0].amount == 0)
         {
@@ -107,33 +89,39 @@ public class UnitSpawner : MonoBehaviour
         }
     }
     
-    public void CallSpawn(GameObject unit, int amount = 1)
+    public void CallSpawn(UnitDefinition unitDef, int amount = 1)
     {
-        if (unit == null || amount <= 0)
+        if (unitDef == null)
+        {
+            Debug.LogError("Spawn Aborted: we are missing the required Unit Definition component");
+            return;
+        }
+        if (amount <= 0)
         {
             return;
         }
 
-        if (_unitsToSpawn.Count > 0 && _unitsToSpawn.Last().unitPrefab == unit)
+        if (_unitsToSpawn.Count > 0 && _unitsToSpawn.Last().unitDefinition == unitDef)
         {
             _unitsToSpawn.Last().amount+= amount;
         }
         else
         {
-            _unitsToSpawn.Add(new SpawnInfo(unit, amount));
+            _unitsToSpawn.Add(new SpawnInfo(unitDef, amount));
         }
     }
 
-    public void UndoLatestUnitCreationReq(GameObject unit)
+    public void UndoLatestUnitCreationReq(UnitDefinition unitDef)
     {
-        if (unit == null)
+        if (unitDef == null)
         {
+            Debug.LogError("Spawn Aborted: we are missing the required Unit Definition component");
             return;
         }
 
         for (int i = _unitsToSpawn.Count - 1; i >= 0; i--)
         {
-            if (_unitsToSpawn[i].unitPrefab == unit)
+            if (_unitsToSpawn[i].unitDefinition == unitDef)
             {
                 if (--_unitsToSpawn[i].amount == 0)
                 {
@@ -144,15 +132,21 @@ public class UnitSpawner : MonoBehaviour
             }
         }
 
-        if (_currentUnit == unit)
+        if (_currentUnit == unitDef)
         {
             _currentUnit = null;
             _spawnCountdownTimer = 0f;
         }
     }
     
-    private void SpawnUnit(GameObject unitToSpawn)
+    private void SpawnUnit(UnitDefinition unitToSpawnDef)
     {
+        GameObject unitToSpawn = unitToSpawnDef.Prefab;
+        if (unitToSpawn == null)
+        {
+            Debug.LogError("Spawn Aborted: we are missing the required UnitPrefab");
+            return; 
+        }
         if (unitToSpawn.GetComponent<UnitMovement>() == null)
         {
             Debug.LogError("Spawn Aborted: we are missing the required UnitMovement component");

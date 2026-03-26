@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class UnitSelectionManager : MonoBehaviour
@@ -9,17 +11,26 @@ public class UnitSelectionManager : MonoBehaviour
     public List<GameObject> allUnitsList = new List<GameObject>();
     public List<GameObject> unitsSelected = new List<GameObject>();
 
+    [SerializeField] private int _maxLines = 5;
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private LayerMask _ground;
     [SerializeField] private GameObject _groundMarker;
     [SerializeField] private RectTransform _selectBox;
     [SerializeField] private float _dragThreshold = 10f;
-
+    [SerializeField] private float _scrollSensWeakener = 0.005f;
+    [SerializeField] private float _additionalUnitRowGapping = 0f;
+    [SerializeField] private float _additionalUnitLineGapping = 0f;
+    [SerializeField] private float unitDistancePaddingMultiplier = 2f; //TODO: make dynamic when other unit types are introduced
+    
     private Camera _cam;
     private Vector2 _mousePosition;
+    private Vector3 _mousePosition3D;
     private Vector2 _boxStartPos;
     private Vector2 _boxDimensions;
-    private bool _isDragging;
+    private Vector3 _dragStartPos;
+    private bool _isLeftDragging;
+    private bool _isRightDragging;
+    private int _currentLineCount;
 
     private void Awake()
     {
@@ -52,7 +63,8 @@ public class UnitSelectionManager : MonoBehaviour
     private void Update()
     {
         HandleLeftClickSelection();
-        HandleRightClickMovementMarker();
+        // HandleRightClickMovementMarker();
+        HandleRightClickMovementRequest();
     }
 
     private void HandleLeftClickSelection()
@@ -61,12 +73,13 @@ public class UnitSelectionManager : MonoBehaviour
                                       !Mouse.current.leftButton.isPressed &&
                                       !Mouse.current.leftButton.wasReleasedThisFrame))
         {
-            _isDragging = false;
+            _isLeftDragging = false;
             return;
         }
 
         _mousePosition = Mouse.current.position.ReadValue();
-
+        _mousePosition3D = GetCurrentMouseWorldPos();
+        
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             HandleLeftClickPressed();
@@ -86,15 +99,15 @@ public class UnitSelectionManager : MonoBehaviour
     private void HandleLeftClickPressed()
     {
         _boxStartPos = _mousePosition;
-        _isDragging = false;
+        _isLeftDragging = false;
         CleanBox();
     }
 
     private void HandleLeftClickHeld()
     {
-        if (!_isDragging && Vector2.Distance(_boxStartPos, _mousePosition) > _dragThreshold)
+        if (!_isLeftDragging && Vector2.Distance(_boxStartPos, _mousePosition) > _dragThreshold)
         {
-            _isDragging = true;
+            _isLeftDragging = true;
 
             if (_selectBox != null)
             {
@@ -102,7 +115,7 @@ public class UnitSelectionManager : MonoBehaviour
             }
         }
 
-        if (_isDragging)
+        if (_isLeftDragging)
         {
             UpdateSelectionBoxVisual();
             UpdateBoxSelection();
@@ -111,12 +124,12 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void HandleLeftClickReleased()
     {
-        if (!_isDragging)
+        if (!_isLeftDragging)
         {
             HandleBasicSelect();
         }
 
-        _isDragging = false;
+        _isLeftDragging = false;
         _boxStartPos = Vector2.zero;
         CleanBox();
     }
@@ -179,13 +192,37 @@ public class UnitSelectionManager : MonoBehaviour
         }
     }
 
-    private void HandleRightClickMovementMarker()
+    private void HandleRightClickMovementRequest()
     {
-        if (Mouse.current == null || !Mouse.current.rightButton.wasPressedThisFrame || unitsSelected.Count == 0)
+        if (Mouse.current == null || (!Mouse.current.rightButton.wasPressedThisFrame &&
+                                     !Mouse.current.rightButton.isPressed &&
+                                     !Mouse.current.rightButton.wasReleasedThisFrame) || unitsSelected.Count <= 0)
         {
+            _isRightDragging = false;
             return;
         }
+        _mousePosition = Mouse.current.position.ReadValue();
+        _mousePosition3D = GetCurrentMouseWorldPos();
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            HandleRightClickPressed();
+        }
 
+        if (Mouse.current.rightButton.isPressed)
+        {
+            HandleRightClickHeld();
+        }
+
+        if (Mouse.current.rightButton.wasReleasedThisFrame)
+        {
+            HandleRightClickReleased();
+        }
+    }
+
+    private void HandleRightClickPressed()
+    {
+        
+        _currentLineCount = 1;
         Ray ray = _cam.ScreenPointToRay(Mouse.current.position.ReadValue());
 
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _clickable))
@@ -194,15 +231,167 @@ public class UnitSelectionManager : MonoBehaviour
 
             if (clickedTeamMember != null && CommandSelectedUnitsToFollow(clickedTeamMember.transform))
             {
+                ShowGroundMarker(_mousePosition3D);
+                _isRightDragging = false;
                 return;
             }
         }
+        _dragStartPos = GetCurrentMouseWorldPos();
+        _isRightDragging = true;
+        ShowGroundMarker(_mousePosition3D);
+    }
 
-        if (Physics.Raycast(ray, out RaycastHit groundHit, Mathf.Infinity, _ground))
+    private void HandleRightClickHeld()
+    {
+        if (!_isRightDragging && Vector2.Distance(_dragStartPos, _mousePosition3D) > _dragThreshold)
         {
-            CommandSelectedUnitsToMove(groundHit.point);
-            ShowGroundMarker(groundHit.point);
+            return;
         }
+        HandleScroll();
+        VisualiseFormation(_currentLineCount, _dragStartPos);
+    }
+
+    private void HandleRightClickReleased()
+    {
+        if (!_isRightDragging)
+        {
+            return;
+        }
+        SendInFormation(_currentLineCount, _dragStartPos);
+        _isRightDragging = false;
+    }
+
+    private void HandleScroll() //TODO: Freeze CameraController (feature not yet implemented)
+    {
+        
+        float scrollValue = Mouse.current.scroll.ReadValue().y * _scrollSensWeakener;
+        if (scrollValue < 0.001f && scrollValue > -0.001f) //zero approximation handling
+        {
+            return;
+        }
+        if (Mouse.current.scroll.ReadValue().y > 0)
+        {
+            _currentLineCount++;
+        }
+        else
+        {
+            _currentLineCount--;
+        }
+        int maxLines = Mathf.Min(_maxLines, unitsSelected.Count);
+        _currentLineCount = Mathf.Clamp(_currentLineCount, 1, maxLines);
+    }
+    private void VisualiseFormation(int amountOfLines, Vector3 target)
+    {
+        List<Vector3> previewPositions = CreateFormation(amountOfLines, target);
+
+        foreach (Vector3 pos in previewPositions)
+        {
+            Debug.DrawRay(pos, Vector3.up * 2f, Color.green); 
+        }
+    }
+    private void SendInFormation(int amountOfLines, Vector3 target)
+    {
+        List<Vector3> formation = CreateFormation(amountOfLines, target);
+        for (int i = 0; i < unitsSelected.Count; i++)
+        {
+            if (i >= formation.Count) break;
+            UnitStateController stateController = unitsSelected[i].GetComponent<UnitStateController>();
+            if (stateController != null)
+            {
+                stateController.MoveTo(formation[i]);
+            }
+        }
+    }
+
+    private List<Vector3> CreateFormation(int amountOfLines, Vector3 target)
+    {
+        if (unitsSelected.Count <= 0)
+        {
+            Debug.LogError("No selected targets to put in formation", this);
+            return new List<Vector3>();
+        }
+        //TODO: acknowledge map borders
+        int unitCount = unitsSelected.Count;
+        int amountOfRows = unitCount / amountOfLines;
+        int leftOverUnits = unitCount % amountOfLines;
+        List<Vector3> positions = new List<Vector3>();
+        int startOfRowOffset = (-amountOfRows / 2);
+        int endOfRowOffset = amountOfRows / 2 + amountOfRows % 2;
+        
+        NavMeshAgent unitAgent =  unitsSelected[0].GetComponent<NavMeshAgent>();
+        if (unitAgent == null)
+        {
+            Debug.LogError("Unit NavMesh agent could not be found", this);
+            return new List<Vector3>();
+        }
+
+        //TODO: these lines assume a singular unit type & size, we must change this one other units are added (and adjust for unit priority in organization)
+        float unitDiameter = unitAgent.radius * 2f;
+        float rowSpacing = unitDistancePaddingMultiplier * unitDiameter + _additionalUnitRowGapping;
+        float lineSpacing = unitDistancePaddingMultiplier * unitDiameter + _additionalUnitLineGapping;
+
+        Vector3 currentMouseWorldPos = GetCurrentMouseWorldPos();
+        Vector3 direction = currentMouseWorldPos - _dragStartPos;
+        direction.y = 0f;
+
+        Quaternion targetRotation = Quaternion.identity; 
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            targetRotation = Quaternion.LookRotation(direction);
+        }
+        
+        for (int line = 0; line < amountOfLines; line++)
+        {
+            for (int row = startOfRowOffset; row < endOfRowOffset; row++)
+            {
+                Vector3 localOffset =
+                    new Vector3(row * rowSpacing, 0f, -line * lineSpacing); 
+                
+                Vector3 rotatedOffset = targetRotation * localOffset;
+                
+                Vector3 finalPos = target + rotatedOffset;
+                finalPos.y = target.y; //TODO: navigate higher/lower y levels (also in the next loops)
+                positions.Add(finalPos);
+            }
+        }
+
+        for (int i = 0; i < leftOverUnits; i++)
+        {
+            if (i % 2 == 0)
+            {
+                Vector3 localOffset =
+                    new Vector3((startOfRowOffset + (i/2)) * rowSpacing, 0f, -amountOfLines * lineSpacing);
+                Vector3 rotatedOffset = targetRotation * localOffset;
+                
+                Vector3 finalPos = target + rotatedOffset;
+                finalPos.y = target.y;
+                positions.Add(finalPos);
+            }
+            else
+            {
+                Vector3 localOffset = new Vector3((endOfRowOffset - 1 - (i/2)) * rowSpacing, 0f, -amountOfLines * lineSpacing);
+                Vector3 rotatedOffset = targetRotation * localOffset;
+                
+                Vector3 finalPos = target + rotatedOffset;
+                finalPos.y = target.y;
+                positions.Add(finalPos);
+            }
+        }
+        
+        return positions;
+    }
+
+    private Vector3 GetCurrentMouseWorldPos()
+    {
+        Vector2 mousePos2D = Mouse.current.position.ReadValue();
+        
+        Ray ray = _cam.ScreenPointToRay(mousePos2D);
+        
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, _ground))
+        {
+            return hit.point;
+        }
+        return Vector3.zero; //shouldn't reach
     }
     
     private bool CommandSelectedUnitsToFollow(Transform target)
@@ -227,24 +416,6 @@ public class UnitSelectionManager : MonoBehaviour
         }
 
         return commandedAnyUnits;
-    }
-
-    private void CommandSelectedUnitsToMove(Vector3 destination)
-    {
-        foreach (GameObject unit in unitsSelected)
-        {
-            if (unit == null)
-            {
-                continue;
-            }
-
-            UnitStateController stateController = unit.GetComponent<UnitStateController>();
-
-            if (stateController != null)
-            {
-                stateController.MoveTo(destination);
-            }
-        }
     }
 
     private void SelectSingleUnit(GameObject unit)

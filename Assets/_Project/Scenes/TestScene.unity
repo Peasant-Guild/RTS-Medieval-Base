@@ -1706,6 +1706,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   allUnitsList: []
   unitsSelected: []
+  _maxLines: 5
   _clickable:
     serializedVersion: 2
     m_Bits: 128
@@ -1715,6 +1716,10 @@ MonoBehaviour:
   _groundMarker: {fileID: 288465521}
   _selectBox: {fileID: 35562436}
   _dragThreshold: 10
+  _scrollSensWeakener: 0.005
+  _additionalUnitRowGapping: 0
+  _additionalUnitLineGapping: 0
+  unitDistancePaddingMultiplier: 2
 --- !u!4 &2025561826
 Transform:
   m_ObjectHideFlags: 0

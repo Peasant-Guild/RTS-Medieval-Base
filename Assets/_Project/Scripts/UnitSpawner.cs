@@ -1,12 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.InputSystem;
 
 public class UnitSpawner : MonoBehaviour
 {
     
-    [SerializeField] private GameObject _unitType; //for debug 
+    [SerializeField] private GameObject _unitType; //for debug (A temporary solution until a menu is configured - see OnMouseDown) 
     [SerializeField] private int _shiftClickAmount = 5;
+    [SerializeField] private int _spawnTeamId = 1;
     [System.Serializable] private class SpawnInfo //does this survive the conventions test? :0
     {
         public GameObject unitPrefab;
@@ -17,11 +19,11 @@ public class UnitSpawner : MonoBehaviour
             this.unitPrefab = unit;
             if (this.unitPrefab != null)
             {
-                this.unitDefinition = this.unitPrefab.GetComponent<UnitDefinition>();
+                this.unitDefinition = this.unitPrefab.GetComponent<Unit>().Definition;
             }
             else
             {
-                Debug.LogError("Spawn Aborted: were missing the required Unit Definition component");
+                Debug.LogError("Spawn Aborted: we are missing the required Unit Definition component");
             }
             this.amount = amount;
         }
@@ -43,8 +45,15 @@ public class UnitSpawner : MonoBehaviour
     private void Start()
     {
         _spawnCountdownTimer = 0;
-        //DEBUG EXAMPLE:
-        // CallSpawn(_unitType, 3, 2f);
+    }
+
+    private void OnMouseDown() //A temporary solution until a menu is configured - DEBUG SOLUTION
+    {
+        if (Keyboard.current.shiftKey.isPressed)
+        {
+            CallSpawn(_unitType, _shiftClickAmount);
+        }
+        CallSpawn(_unitType);
     }
     
     private void Update()
@@ -70,7 +79,7 @@ public class UnitSpawner : MonoBehaviour
             //whether or not we are currently working is determined by the _currentUnit (if its null, we're idle)
         }
     }
-
+    
     private void UpdateTimer()
     {
         _spawnCountdownTimer -= Time.deltaTime;
@@ -134,7 +143,7 @@ public class UnitSpawner : MonoBehaviour
     {
         if (unitToSpawn.GetComponent<UnitMovement>() == null)
         {
-            Debug.LogError("Spawn Aborted: were missing the required UnitMovement component");
+            Debug.LogError("Spawn Aborted: we are missing the required UnitMovement component");
             return; 
         }
         Vector3 newPos = transform.position + _entranceSpawnOffset;
@@ -144,6 +153,13 @@ public class UnitSpawner : MonoBehaviour
         {
             return;
         }
+        //A temporary solution until a menu is configured - DEBUG SOLUTION:
+        TeamMember spawnedUnit = unit_obj.GetComponent<TeamMember>();
+        if (spawnedUnit != null)
+        {
+            spawnedUnit.SetTeamId(_spawnTeamId);
+        }
+        // end of DEBUG SOLUTION
         UnitMovement walker = unit_obj.GetComponent<UnitMovement>();
         walker.MoveTo(transform.position + _outsideOffset);
         

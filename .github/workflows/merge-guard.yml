@@ -1,0 +1,10 @@
+name: merge-guard
+
+on:
+  pull_request:
+
+jobs:
+  merge-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "ok"

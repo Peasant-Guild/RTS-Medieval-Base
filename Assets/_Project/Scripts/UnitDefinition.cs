@@ -12,6 +12,8 @@ public class UnitDefinition : ScriptableObject
     [SerializeField] private float _attackRange = 5f;
     [SerializeField] private float _attackDamage = 4f;
     [SerializeField] private float _attackInterval = 1f;
+    [SerializeField] private float _spawnTime = 1f;
+    
 
     public GameObject Prefab => _prefab;
     public RuntimeAnimatorController AnimatorController => _animatorController;
@@ -21,7 +23,8 @@ public class UnitDefinition : ScriptableObject
     public float AttackRange => _attackRange;
     public float AttackDamage => _attackDamage;
     public float AttackInterval => _attackInterval;
-
+    public float SpawnTime => _spawnTime;
+    
     public static event Action<UnitDefinition> Changed;
 
     private void OnValidate()

@@ -357,7 +357,7 @@ public class UnitSelectionManager : MonoBehaviour
 
 public class IndexedSet<T>: IEnumerable<T>
 {
-    public int Count;
+    public int Count { get; private set; }
     private List<T> _unitsSelectedList;
     private Dictionary<T, int> _unitsSelectedIndexDict;
     public IndexedSet()

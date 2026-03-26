@@ -17,13 +17,22 @@ public class UnitSpawner : MonoBehaviour
         public SpawnInfo(GameObject unit, int amount = 1)
         {
             this.unitPrefab = unit;
+            
             if (this.unitPrefab != null)
             {
-                this.unitDefinition = this.unitPrefab.GetComponent<Unit>().Definition;
+                Unit unitComponent = this.unitPrefab.GetComponent<Unit>();
+                if (unitComponent != null)
+                {
+                    this.unitDefinition = unitComponent.Definition;
+                }
+                else
+                {
+                    Debug.LogError("Spawn Aborted: we are missing the required Unit Definition component");
+                }
             }
             else
             {
-                Debug.LogError("Spawn Aborted: we are missing the required Unit Definition component");
+                Debug.LogError("Spawn Aborted: we are missing the required Unit component");
             }
             this.amount = amount;
         }

@@ -53,7 +53,10 @@ public class UnitSpawner : MonoBehaviour
         {
             CallSpawn(_unitType, _shiftClickAmount);
         }
-        CallSpawn(_unitType);
+        else
+        {
+            CallSpawn(_unitType);
+        }
     }
     
     private void Update()

@@ -586,6 +586,79 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 993f6e95767a756429448fb6533178ad, type: 3}
+--- !u!1001 &421178559
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.250001
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7056864
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7085244
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90.23
+      objectReference: {fileID: 0}
+    - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6776700514717911703, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: m_Name
+      value: Red Team Spawner
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493781606162483121, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: _unitType
+      value: 
+      objectReference: {fileID: 4995010714366886464, guid: 53d749c529c922142a81dd05ed9c1b3e, type: 3}
+    - target: {fileID: 8493781606162483121, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: _spawnTeamId
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493781606162483121, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: _outsideOffset.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493781606162483121, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
+      propertyPath: _outsideOffset.z
+      value: -2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
 --- !u!1 &554184377
 GameObject:
   m_ObjectHideFlags: 0
@@ -1741,7 +1814,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 40.216328
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1749,7 +1822,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 27.12644
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6267857009299481532, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1781,7 +1854,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6776700514717911703, guid: 2e978651b982a9641b9c58e6656a349d, type: 3}
       propertyPath: m_Name
-      value: Spawner
+      value: Blue Team Spawner
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1922,5 +1995,6 @@ SceneRoots:
   - {fileID: 1613537480}
   - {fileID: 1130297812}
   - {fileID: 2049335196}
+  - {fileID: 421178559}
   - {fileID: 340854171}
   - {fileID: 1065419817}

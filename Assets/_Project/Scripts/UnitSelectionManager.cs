@@ -1,14 +1,20 @@
+using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 public class UnitSelectionManager : MonoBehaviour
 {
     public static UnitSelectionManager Instance { get; set; }
-
+    
     public List<GameObject> allUnitsList = new List<GameObject>();
-    public List<GameObject> unitsSelected = new List<GameObject>();
-
+    
+    public IndexedSet<GameObject> unitsSelected = new IndexedSet<GameObject>(); //an optimized version of list implemented at the bottom
+    
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private LayerMask _ground;
     [SerializeField] private GameObject _groundMarker;
@@ -250,7 +256,7 @@ public class UnitSelectionManager : MonoBehaviour
     private void SelectSingleUnit(GameObject unit)
     {
         ClearSelection();
-
+        
         unitsSelected.Add(unit);
         SetUnitSelected(unit, true);
     }
@@ -315,7 +321,6 @@ public class UnitSelectionManager : MonoBehaviour
 
             SetUnitSelected(unit, false);
         }
-
         unitsSelected.Clear();
 
         if (_groundMarker == null)
@@ -347,5 +352,94 @@ public class UnitSelectionManager : MonoBehaviour
         _groundMarker.SetActive(false);
         // TODO: Marker animation here
         _groundMarker.SetActive(true);
+    }
+}
+
+public class IndexedSet<T>: IEnumerable<T>
+{
+    public int Count { get; private set; }
+    private List<T> _unitsSelectedList;
+    private Dictionary<T, int> _unitsSelectedIndexDict;
+    public IndexedSet()
+    {
+        _unitsSelectedList = new List<T>();
+        _unitsSelectedIndexDict = new Dictionary<T, int>();
+        Count = 0;
+    }
+
+    public IndexedSet(IEnumerable<T> collection): this()
+    {
+        foreach (T item in collection)
+        {
+            Add(item);
+        }
+    }
+        
+        
+    public void Add(T objToAdd)
+    {
+        if (Contains(objToAdd))
+        {
+            return;
+        }
+        
+        _unitsSelectedIndexDict.Add(objToAdd, Count);
+        _unitsSelectedList.Add(objToAdd);
+        Count++;
+    }
+
+    public void Remove(T objToRemove)
+    {
+        if (!_unitsSelectedIndexDict.ContainsKey(objToRemove))
+        {
+            return;
+        }
+            
+        int index = _unitsSelectedIndexDict[objToRemove];
+        _unitsSelectedList[index] = _unitsSelectedList[Count - 1];
+        _unitsSelectedIndexDict[_unitsSelectedList[index]] = index;
+
+        _unitsSelectedIndexDict.Remove(objToRemove);
+        _unitsSelectedList.RemoveAt(Count - 1);
+            
+        Count--;
+    }
+
+    public T this[int index] //READ ONLY!
+    {
+        get
+        {
+            return _unitsSelectedList[index];
+        }
+    }
+    
+    public void Clear()
+    {
+        _unitsSelectedList.Clear();
+        _unitsSelectedIndexDict.Clear();
+        Count = 0;
+    }
+    public bool Contains(T objToCheck)
+    {
+        return _unitsSelectedIndexDict.ContainsKey(objToCheck);
+    }
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        return _unitsSelectedList.GetEnumerator();
+    }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+        
+        
+}
+
+public static class IndexedSetExtensions
+{
+    public static IndexedSet<T> ToIndexedSet<T>(this IEnumerable<T> source)
+    {
+        return new IndexedSet<T>(source);
     }
 }

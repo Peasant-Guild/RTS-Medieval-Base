@@ -32,7 +32,18 @@ public class UnitMovement : MonoBehaviour
         _agent.isStopped = false;
         _agent.SetDestination(destination);
     }
+    public void MoveTo(Vector3 destination, Vector3 direction, float stoppingDistance = 0f)
+    {
+        if (_agent == null)
+        {
+            return;
+        }
 
+        _agent.stoppingDistance = stoppingDistance;
+        _agent.isStopped = false;
+        _agent.SetDestination(destination);
+        //TODO: Make them face the correct direction
+    }
     public void Stop()
     {
         if (_agent == null)

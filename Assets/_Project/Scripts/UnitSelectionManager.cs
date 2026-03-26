@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class UnitSelectionManager : MonoBehaviour
@@ -19,6 +20,7 @@ public class UnitSelectionManager : MonoBehaviour
     [SerializeField] private float _scrollSensWeakener = 0.005f;
     [SerializeField] private float _additionalUnitRowGapping = 0f;
     [SerializeField] private float _additionalUnitLineGapping = 0f;
+    [SerializeField] private float unitDistancePaddingMultiplier = 2f; //TODO: make dynamic when other unit types are introduced
     
     private Camera _cam;
     private Vector2 _mousePosition;
@@ -194,7 +196,7 @@ public class UnitSelectionManager : MonoBehaviour
     {
         if (Mouse.current == null || (!Mouse.current.rightButton.wasPressedThisFrame &&
                                      !Mouse.current.rightButton.isPressed &&
-                                     !Mouse.current.rightButton.wasReleasedThisFrame))
+                                     !Mouse.current.rightButton.wasReleasedThisFrame) || unitsSelected.Count <= 0)
         {
             _isRightDragging = false;
             return;
@@ -241,7 +243,7 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void HandleRightClickHeld()
     {
-        if (!_isRightDragging)
+        if (!_isRightDragging && Vector2.Distance(_dragStartPos, _mousePosition3D) > _dragThreshold)
         {
             return;
         }
@@ -303,15 +305,30 @@ public class UnitSelectionManager : MonoBehaviour
 
     private List<Vector3> CreateFormation(int amountOfLines, Vector3 target)
     {
-        //TODO: acknowledge borders
+        if (unitsSelected.Count <= 0)
+        {
+            Debug.LogError("No selected targets to put in formation", this);
+            return new List<Vector3>();
+        }
+        //TODO: acknowledge map borders
         int unitCount = unitsSelected.Count;
         int amountOfRows = unitCount / amountOfLines;
         int leftOverUnits = unitCount % amountOfLines;
         List<Vector3> positions = new List<Vector3>();
         int startOfRowOffset = (-amountOfRows / 2);
         int endOfRowOffset = amountOfRows / 2 + amountOfRows % 2;
-        float rowSpacing = 1f + _additionalUnitRowGapping;
-        float lineSpacing = 1f + _additionalUnitLineGapping;
+        
+        NavMeshAgent unitAgent =  unitsSelected[0].GetComponent<NavMeshAgent>();
+        if (unitAgent == null)
+        {
+            Debug.LogError("Unit NavMesh agent could not be found", this);
+            return new List<Vector3>();
+        }
+
+        //TODO: these lines assume a singular unit type & size, we must change this one other units are added (and adjust for unit priority in organization)
+        float unitDiameter = unitAgent.radius * 2f;
+        float rowSpacing = unitDistancePaddingMultiplier * unitDiameter + _additionalUnitRowGapping;
+        float lineSpacing = unitDistancePaddingMultiplier * unitDiameter + _additionalUnitLineGapping;
 
         Vector3 currentMouseWorldPos = GetCurrentMouseWorldPos();
         Vector3 direction = currentMouseWorldPos - _dragStartPos;

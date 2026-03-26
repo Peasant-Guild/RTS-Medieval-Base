@@ -4,6 +4,11 @@ using UnityEngine;
 [RequireComponent(typeof(TeamMember))]
 public class CombatController : MonoBehaviour
 {
+    private const float MaxInitialAttackOffset = 0.5f;
+    private const float MinAttackRange = 0.1f;
+    private const float MinAttackDamage = 0f;
+    private const float MinAttackInterval = 0.01f;
+
     [Header("Attack")]
     [SerializeField] private float _attackRange = 2f;
     [SerializeField] private float _attackDamage = 1f;
@@ -14,11 +19,14 @@ public class CombatController : MonoBehaviour
     private TeamMember _teamMember;
 
     public float AttackRange => _attackRange;
+    public float AttackDamage => _attackDamage;
+    public float AttackInterval => _attackInterval;
 
     private void Awake()
     {
         _health = GetComponent<Health>();
         _teamMember = GetComponent<TeamMember>();
+        _lastAttackTime = Time.time - Random.Range(0f, MaxInitialAttackOffset);
     }
 
     public bool IsTargetInAttackRange(Transform target)
@@ -47,6 +55,13 @@ public class CombatController : MonoBehaviour
         _lastAttackTime = Time.time;
         target.GetComponent<Health>().TakeDamage(_attackDamage);
         return true;
+    }
+
+    public void ConfigureAttack(float attackRange, float attackDamage, float attackInterval)
+    {
+        _attackRange = Mathf.Max(MinAttackRange, attackRange);
+        _attackDamage = Mathf.Max(MinAttackDamage, attackDamage);
+        _attackInterval = Mathf.Max(MinAttackInterval, attackInterval);
     }
 
     private bool CanAttackTarget(Transform target)

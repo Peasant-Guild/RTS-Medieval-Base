@@ -173,6 +173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
   _selectionIndicator: {fileID: 8609201143416214840}
+  _definition: {fileID: 0}
 --- !u!114 &1860000000000000001
 MonoBehaviour:
   m_ObjectHideFlags: 0

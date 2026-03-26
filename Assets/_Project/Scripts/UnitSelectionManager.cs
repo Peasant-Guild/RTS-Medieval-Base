@@ -10,6 +10,7 @@ public class UnitSelectionManager : MonoBehaviour
     public List<GameObject> allUnitsList = new List<GameObject>();
     public List<GameObject> unitsSelected = new List<GameObject>();
 
+    [SerializeField] private int _maxLines = 5;
     [SerializeField] private LayerMask _clickable;
     [SerializeField] private LayerMask _ground;
     [SerializeField] private GameObject _groundMarker;
@@ -262,7 +263,7 @@ public class UnitSelectionManager : MonoBehaviour
     {
         
         float scrollValue = Mouse.current.scroll.ReadValue().y * _scrollSensWeakener;
-        if (scrollValue < 0.001f && scrollValue > -0.001f)
+        if (scrollValue < 0.001f && scrollValue > -0.001f) //zero approximation handling
         {
             return;
         }
@@ -274,7 +275,7 @@ public class UnitSelectionManager : MonoBehaviour
         {
             _currentLineCount--;
         }
-        int maxLines = Mathf.Min(5, unitsSelected.Count);
+        int maxLines = Mathf.Min(_maxLines, unitsSelected.Count);
         _currentLineCount = Mathf.Clamp(_currentLineCount, 1, maxLines);
     }
     private void VisualiseFormation(int amountOfLines, Vector3 target)

@@ -3,7 +3,12 @@ using UnityEngine.AI;
 
 public class UnitMovement : MonoBehaviour
 {
+    private const float AccelerationMultiplier = 4f;
+    private const float MinMoveSpeed = 0.1f;
+
     private NavMeshAgent _agent;
+
+    public float MoveSpeed => _agent != null ? _agent.speed : 0f;
 
     private void Awake()
     {
@@ -76,5 +81,16 @@ public class UnitMovement : MonoBehaviour
         }
 
         return _agent.remainingDistance <= _agent.stoppingDistance;
+    }
+
+    public void ConfigureMoveSpeed(float moveSpeed)
+    {
+        if (_agent == null)
+        {
+            return;
+        }
+
+        _agent.speed = Mathf.Max(MinMoveSpeed, moveSpeed);
+        _agent.acceleration = Mathf.Max(_agent.speed * AccelerationMultiplier, _agent.speed + MinMoveSpeed);
     }
 }

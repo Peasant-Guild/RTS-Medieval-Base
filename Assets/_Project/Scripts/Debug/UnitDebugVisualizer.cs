@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -8,7 +9,8 @@ public class UnitDebugVisualizer : MonoBehaviour
     [Header("State Colors")]
     [SerializeField] private Color _idleColor = Color.gray;
     [SerializeField] private Color _movingColor = Color.cyan;
-    [SerializeField] private Color _followingColor = Color.yellow;
+    [FormerlySerializedAs("_followingColor")]
+    [SerializeField] private Color _pursuingColor = Color.yellow;
     [SerializeField] private Color _attackingColor = Color.red;
 
     [Header("Gizmo Colors")]
@@ -142,7 +144,7 @@ public class UnitDebugVisualizer : MonoBehaviour
         {
             UnitStateController.UnitState.Idle => _idleColor,
             UnitStateController.UnitState.Moving => _movingColor,
-            UnitStateController.UnitState.Following => _followingColor,
+            UnitStateController.UnitState.Pursuing => _pursuingColor,
             UnitStateController.UnitState.Attacking => _attackingColor,
             _ => _idleColor
         };

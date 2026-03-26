@@ -19,6 +19,10 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float _panSpeedMouse = 30f;
 
     [SerializeField] private float _panBorderThickness = 20f;
+
+    private bool _cameraActive = true;
+    private float _lastActivtionTime = 0f;
+    private float _activationCooldownTime = 0.5f;
     private float _scrollValue;
     private Vector3 _direction;
 
@@ -41,10 +45,24 @@ public class CameraController : MonoBehaviour
             return;
         }
 
+        HandleCameraActivation();
+        if (!_cameraActive)
+        {
+            return;
+        }
         HandleCameraMovement();
         HandleCameraZoom();
     }
 
+    private void HandleCameraActivation()
+    {
+        if (Time.time - _lastActivtionTime >= _activationCooldownTime &&
+            Keyboard.current.leftShiftKey.isPressed && Keyboard.current.cKey.isPressed)
+        {
+            _cameraActive = !_cameraActive;
+            _lastActivtionTime = Time.time;
+        }
+    }
     private void HandleCameraMovement()
     {
         float yaw = _cam.transform.eulerAngles.y;
